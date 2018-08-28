@@ -14,6 +14,9 @@ class PDFLatexMagic(Magics):
         Run pdflatex on resultant file
         Display image'''
         
+        # Get working directory and save for later
+        cwd = os.getcwd()
+        
         # UID
         self._id = str(id(cell))
         
@@ -24,7 +27,7 @@ class PDFLatexMagic(Magics):
         self.pdfname = os.path.join(self.tempdir.name, self._id + '.pdf')
         self.pngname = os.path.join(self.tempdir.name, self._id + '.png')
         
-        self.writeLatex(cell)
+        self.writeLatex(cell, cwd)
 
         if self.makeImage():
             ret_val = Image(filename=self.pngname)
@@ -33,21 +36,24 @@ class PDFLatexMagic(Magics):
             print(self.error.output.decode())
             ret_val = None
         
+        os.chdir(cwd)
+        
         return ret_val
 
-    def writeLatex(self, celltext):
+    def writeLatex(self, celltext, cwd):
         '''Write cell text wrapped with latex: header, footer'''
         
         template = r'''
         \documentclass[convert, varwidth]{standalone}
-        \usepackage{amsmath,amssymb,amsthm,amsxtra}
+        \usepackage{amsmath,amssymb,amsthm,amsxtra,graphicx}
+        \graphicspath{{%(CWD)s/}{%(CWD)s/../images/}{%(CWD)s/../figures/}}
         \begin{document}
             %(CELLTEXT)s
         \end{document}
         '''
         
         with open(self.texname, 'w') as tex:
-            tex.write(template%{'CELLTEXT' : celltext})
+            tex.write(template%{'CELLTEXT' : celltext, 'CWD' : cwd})
         
     def makeImage(self):
         '''Make pdf with pdflatex and convert to png
@@ -58,6 +64,9 @@ class PDFLatexMagic(Magics):
         made_png = False
         
         try:
+            # Alternative (azure???) doesn't work with figures
+            #pdflatex --output-format=dvi test.tex
+            #dvipng -D 300 test.dvi
             result = subprocess.run(['pdflatex', '-halt-on-error', self.texname],
                                     check=True,
                                     timeout=5,
