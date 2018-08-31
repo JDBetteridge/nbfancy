@@ -10,9 +10,11 @@ PDF_DIR = ../pdf
 
 # Files
 SRC_FILES = $(wildcard $(SRC_DIR)/*.ipynb)
-RENDERED_FILES = $(patsubst $(SRC_DIR)/%.ipynb,$(RENDERED_DIR)/%.ipynb,$(SRC_FILES))
-HTML_FILES = $(patsubst $(SRC_DIR)/%.ipynb,%.html,$(SRC_FILES))
-PDF_FILES = $(patsubst $(SRC_DIR)/%.ipynb,%.pdf,$(SRC_FILES))
+RENDERED_FILES_TARGET = $(patsubst $(SRC_DIR)/%.ipynb,$(RENDERED_DIR)/%.ipynb,$(SRC_FILES))
+RENDERED_FILES = $(wildcard $(RENDERED_DIR)/*.ipynb)
+#$(patsubst $(SRC_DIR)/%.ipynb,$(RENDERED_DIR)/%.ipynb,$(SRC_FILES))
+HTML_FILES = $(patsubst $(RENDERED_DIR)/%.ipynb,%.html,$(RENDERED_FILES))
+PDF_FILES = $(patsubst $(HTML_DIR)/%.html,%.pdf,$(HTML_FILES))
 
 # Compilers
 RENDERCC = python nbfancy.py
@@ -26,9 +28,11 @@ PFLAGS =
 
 # Default (we don't actually want to do anything)
 default:
-	echo $(SRC_FILES)
-	echo $(RENDERED_FILES)
-	echo $(HTML_FILES)
+	-echo $(SRC_FILES)
+	echo
+	-echo $(RENDERED_FILES)
+	echo
+	-echo $(HTML_FILES)
 	@echo "This make file is only used to generate static webpages."
 	@echo "There should be no reason for the end user to run make."
 	@echo "Proceed at your own peril!"
@@ -37,7 +41,7 @@ default:
 all: render html pdf
 
 # Render all notebooks
-render: $(RENDERED_DIR) $(RENDERED_FILES)
+render: $(RENDERED_DIR) $(RENDERED_FILES_TARGET)
 
 # Build all HTML pages
 html: $(HTML_DIR) $(HTML_FILES) $(HTML_DIR)/css.chk
@@ -69,7 +73,7 @@ $(HTML_DIR)/css.chk:
 # HTML recipe
 .PRECIOUS: %.html
 %.html: $(RENDERED_DIR)/%.ipynb $(HTML_DIR)/css.chk
-	$(NBCC) $(HFLAGS) --to=html --template=style_template.tpl --output-dir=$(HTML_DIR) $<
+	$(NBCC) $(HFLAGS) --to=html --output-dir=$(HTML_DIR) $<
 	# Replace '.ipynb' in links with '.html'
 	sed -i 's/.ipynb/.html/g' $(HTML_DIR)/$@
 	# Horrible hack because <code> environment doesn't seem to work with CSS sheet

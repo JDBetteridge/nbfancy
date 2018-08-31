@@ -106,7 +106,8 @@ for c in markdownlist:
         body = '\n'.join(line[1:])
         safetitle = title.replace(' ', '-')
         safetitle = safetitle.replace('`', '')
-        link = solnfilename + '#' + urlquote(safetitle, safe='?!$\\') + '%0A'
+        link = './' + solnfilename.split('/')[-1] + '#' + urlquote(safetitle, safe='?!$\\') + '%0A'
+        print(link)
         body += '\n\n [Solution]({link})'.format(link=link)
     elif 'Solution' in line[0]:
         solnflag = True
