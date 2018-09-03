@@ -154,17 +154,26 @@ def navigation_triple(directory, inputfile):
     contents = os.listdir(directory)
     contents.sort()
     try:
+        # Remove checkpoints folder from list
         contents.remove('.ipynb_checkpoints')
     except ValueError:
         pass
-
+    
+    # Remove solution files from index
+    contents = [f for f in contents if '-soln' not in f]
+    
     for afile in contents:
         print('          ', afile)
     
     contents.append(contents[0])
     
     current = inputfile.split('/')[-1]
+    # Exceptional case if you're making a new solution document
+    if '-soln' in current:
+        current = current.replace('-soln','')
+    
     index = contents.index(current)
+    
     outdir = './'
     print('Navigation triple is: ', outdir+contents[index-1], outdir+contents[0], outdir+contents[index+1])
     triple = {  'previous' : outdir+contents[index-1],
