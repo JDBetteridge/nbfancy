@@ -37,17 +37,18 @@ parser.add_argument('--sourcedir',
                     help='Directory with existing notebook structure')
 args = parser.parse_args()
 
-def apply_template(colour, symbol, title, body):
+def apply_template(colour, symbol, title, body, index=None):
     template = '''
 <div class="w3-panel w3-leftbar w3-border-{colour} w3-pale-{colour} w3-padding-small">
-    <h3><i class="fa fa-{symbol}"></i> {title}</h3>
+    <h3 id="{index}"><i class="fa fa-{symbol}"></i> {title}</h3>
     {body}
 </div>
 '''
     values = {  'colour' : colour,
                 'symbol' : symbol,
                 'title'  : title,
-                'body'   : body}
+                'body'   : body,
+                'index'  : index }
     return template.format_map(values)
 
 # Colours
@@ -87,17 +88,26 @@ for c in markdownlist:
         symbol = 'star'
         title = line[0].lstrip('#')
         body = '\n'.join(line[1:])
+        safetitle = title.replace(' ', '-')
+        safetitle = safetitle.replace('`', '')
+        index = urlquote(safetitle, safe='?!$\\') + '%0A'
     elif 'Overview' in line[0]:
         colour = 'green'
         symbol = 'file-o'
         title = line[0].lstrip('#')
         body = '\n'.join(line[1:])
+        safetitle = title.replace(' ', '-')
+        safetitle = safetitle.replace('`', '')
+        index = urlquote(safetitle, safe='?!$\\') + '%0A'
     elif 'Info' in line[0]:
         colour = 'blue'
         symbol = 'info-circle'
         subtitle = line[0].split(':')
         title = ':'.join(subtitle[1:])
         body = '\n'.join(line[1:])
+        safetitle = title.replace(' ', '-')
+        safetitle = safetitle.replace('`', '')
+        index = urlquote(safetitle, safe='?!$\\') + '%0A'
     elif 'Exercise' in line[0]:
         colour = 'yellow'
         symbol = 'pencil-square-o'
@@ -109,6 +119,9 @@ for c in markdownlist:
         link = './' + solnfilename.split('/')[-1] + '#' + urlquote(safetitle, safe='?!$\\') + '%0A'
         print(link)
         body += '\n\n [Solution]({link})'.format(link=link)
+        safetitle = title.replace(' ', '-')
+        safetitle = safetitle.replace('`', '')
+        index = urlquote(safetitle, safe='?!$\\') + '%0A'
     elif 'Solution' in line[0]:
         solnflag = True
         if solnb is None:
@@ -126,11 +139,17 @@ for c in markdownlist:
         subtitle = line[0].split(':')
         title = ':'.join(subtitle[1:])
         body = '\n'.join(line[1:])
+        safetitle = title.replace(' ', '-')
+        safetitle = safetitle.replace('`', '')
+        index = urlquote(safetitle, safe='?!$\\') + ' '
     elif 'Key Points' in line[0]:
         colour = 'green'
         symbol = 'key'
         title = line[0].lstrip('#')
         body = '\n'.join(line[1:])
+        safetitle = title.replace(' ', '-')
+        safetitle = safetitle.replace('`', '')
+        index = urlquote(safetitle, safe='?!$\\') + ' '
     elif 'Schedule' in line[0]:
         colour = None
         body = '\n'.join(line)
@@ -146,7 +165,7 @@ for c in markdownlist:
         temp = htmltitle.replace('<p>', '')
         htmltitle = temp.replace('</p>', '')
         htmlbody = nc.filters.markdown2html(body)
-        c['source'] = apply_template(colour, symbol, htmltitle, htmlbody)
+        c['source'] = apply_template(colour, symbol, htmltitle, htmlbody, index)
 
 def navigation_triple(directory, inputfile):
     print('Directory: ', directory)
