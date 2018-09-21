@@ -117,7 +117,7 @@ for c in markdownlist:
         safetitle = title.replace(' ', '-')
         safetitle = safetitle.replace('`', '')
         link = './' + solnfilename.split('/')[-1] + '#' + urlquote(safetitle, safe='?!$\\') + '%0A'
-        print(link)
+        #print(link)
         body += '\n\n [Solution]({link})'.format(link=link)
         safetitle = title.replace(' ', '-')
         safetitle = safetitle.replace('`', '')
@@ -131,6 +131,7 @@ for c in markdownlist:
         
         solnb['cells'].append(nf.v4.new_markdown_cell(source=''))
         # REDEFINE c
+        solnb['cells'][-1] = c.copy()
         plain['cells'].remove(c)
         c = solnb['cells'][-1]
         
@@ -164,7 +165,11 @@ for c in markdownlist:
         htmltitle = nc.filters.markdown2html(title)
         temp = htmltitle.replace('<p>', '')
         htmltitle = temp.replace('</p>', '')
+        
         htmlbody = nc.filters.markdown2html(body)
+        temp = htmlbody.replace('*', '&ast;')
+        htmlbody = temp.replace('_', '&lowbar;')
+        
         c['source'] = apply_template(colour, symbol, htmltitle, htmlbody, index)
 
 def navigation_triple(directory, inputfile):
@@ -218,6 +223,8 @@ if args.footercell is not None:
     
 outfp = open(args.output, 'w')
 print('Writing output file: ' + args.output)
+plain['metadata']['celltoolbar'] = 'None'
+plain['metadata']['livereveal'] =  {'scroll' : True}
 nf.write(plain, outfp)
 args.input.close()
 outfp.close()
@@ -225,6 +232,8 @@ outfp.close()
 if solnflag:
     solfp = open(solnfilename, 'w')
     print('and also solution outputfile')
+    solnb['metadata']['celltoolbar'] = 'None'
+    #solnb['metadata']['livereveal'] =  {"scroll" : True}
     nf.write(solnb, solfp)
     solfp.close()
     
