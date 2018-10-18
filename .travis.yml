@@ -1,0 +1,17 @@
+install:
+  - conda install jupyter
+
+before_script: cd tools
+
+script:
+  - make html
+
+deploy:
+  provider: pages
+  repo: james-grant1/template-tutorial
+  target-branch: gh-pages
+  local-dir: html
+  github_token: $GITHUB_TOKEN
+  skip-cleanup: true
+  on:
+    branch: master
