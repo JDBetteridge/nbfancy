@@ -4,6 +4,9 @@ python:
   - "2.7"
   - "3.5"
   - "3.6"
+
+before_install: cd tools
+
 install:
   - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
@@ -25,7 +28,6 @@ install:
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION jupyter 
   - source activate test-environment
 
-before_script: cd tools
 
 script:
   - make html
