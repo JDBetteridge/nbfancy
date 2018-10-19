@@ -1,8 +1,6 @@
 language: python
 python:
   # We don't actually use the Travis Python, but this keeps it organized.
-  - "2.7"
-  - "3.5"
   - "3.6"
 
 before_install: cd tools
@@ -25,7 +23,7 @@ install:
   - conda info -a
 
   # Replace dep1 dep2 ... with your dependencies
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION jupyter 
+  - conda create -q -n test-environment python=3.6 jupyter 
   - source activate test-environment
 
 
