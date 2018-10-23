@@ -20,7 +20,7 @@ Jupyter notebooks were chosen as the medium for a number of reasons:
 Reproducing the formatting richness of the [Software Carpentry](https://software-carpentry.org/) lessons was a key element to include the good teaching practice.
 In order to retain this richness we created a build system to process initial notebooks into rich notebooks for use by students, html pages and pdfs for distribution as hard copies.
 As a result this template tutorial has been created to assist users in creating their own courses, as both an lesson and demonstration of its use.
-The tutorial is available online in (rendered html)[https://james-grant1.github.io/template-tutorial/00\_schedule.html]
+The tutorial is available online in [rendered html](https://james-grant1.github.io/template-tutorial/00\_schedule.html)
 
 ## Contributions to the build system
 
