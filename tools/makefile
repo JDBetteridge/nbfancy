@@ -3,10 +3,12 @@
 ########################################
 
 # Folders
-SRC_DIR = ../notebooks_plain
-RENDERED_DIR = ../notebooks_rendered
-HTML_DIR = ../html
-PDF_DIR = ../pdf
+ROOT_DIR = ..
+SRC_DIR = $(ROOT_DIR)/notebooks_plain
+RENDERED_DIR = $(ROOT_DIR)/notebooks_rendered
+HTML_DIR = $(ROOT_DIR)/html
+PDF_DIR = $(ROOT_DIR)/pdf
+IMAGE_DIR = $(ROOT_DIR)/images
 
 # Files
 SRC_FILES = $(wildcard $(SRC_DIR)/*.ipynb)
@@ -45,7 +47,7 @@ render: $(RENDERED_DIR) $(RENDERED_FILES_TARGET)
 	$(PRINT)
 
 # Build all HTML pages
-html: render $(HTML_DIR) $(HTML_DIR)/css.chk
+html: render $(HTML_DIR) $(HTML_DIR)/css.chk $(HTML_DIR)/index.html
 	$(PRINT)
 	$(eval RENDERED_FILES = $(shell ls $(RENDERED_DIR)/*.ipynb))
 	$(eval HTML_FILES = $(patsubst $(RENDERED_DIR)/%.ipynb,$(HTML_DIR)/%.html,$(RENDERED_FILES)))
@@ -84,6 +86,13 @@ $(HTML_DIR)/css.chk:
 	cp ./custom.css $(HTML_DIR)/custom.css
 	touch $(HTML_DIR)/css.chk
 
+#Create index for html and copy image directory to html build
+$(HTML_DIR)/index.html:
+	$(PRINT)
+	pandoc $(ROOT_DIR)/README.md > $(HTML_DIR)/index.html
+	cat ./index_footer.html >> $(HTML_DIR)/index.html
+	cp -r $(IMAGE_DIR) $(HTML_DIR)/
+
 # HTML recipe
 .PRECIOUS: %.html
 $(HTML_DIR)/%.html: $(RENDERED_DIR)/%.ipynb $(HTML_DIR)/css.chk
@@ -95,6 +104,8 @@ $(HTML_DIR)/%.html: $(RENDERED_DIR)/%.ipynb $(HTML_DIR)/css.chk
 	sed -i 's/<code>/<code style="background-color:#F7F7F7;border:1px solid #CFCFCF">/g' $(HTML_DIR)/$@
 	# Another hack since \n is converted to [space] in links
 	sed -i 's/%0A"/%20"/g' $(HTML_DIR)/$@
+
+        
 	
 # Hopefully removable
 # schedule HTML recipe (Correctly handles table)
