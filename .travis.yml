@@ -32,7 +32,7 @@ script:
 
 deploy:
   provider: pages
-  repo: arc-bath/template-jupyter
+  repo: arc-bath/template_jupyter
   target-branch: gh-pages
   local-dir: html
   github_token: $GITHUB_TOKEN
