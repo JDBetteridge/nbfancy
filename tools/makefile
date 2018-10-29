@@ -98,7 +98,9 @@ $(HTML_DIR)/index.html:
 $(HTML_DIR)/%.html: $(RENDERED_DIR)/%.ipynb $(HTML_DIR)/css.chk
 	$(PRINT)
 	$(NBCC) $(HFLAGS) $<
-	# Replace '.ipynb' in links with '.html'
+	# Replace '../images' in links with './images'
+	sed -i 's/..\/images/.\/images/g' $(HTML_DIR)/$@
+	# Horrible hack because <code> environment doesn't seem to work with CSS sheet
 	sed -i 's/.ipynb/.html/g' $(HTML_DIR)/$@
 	# Horrible hack because <code> environment doesn't seem to work with CSS sheet
 	sed -i 's/<code>/<code style="background-color:#F7F7F7;border:1px solid #CFCFCF">/g' $(HTML_DIR)/$@
