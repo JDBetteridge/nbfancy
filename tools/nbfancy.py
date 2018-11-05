@@ -158,6 +158,24 @@ for c in markdownlist:
         html2 = html.replace('<table>', '<table class="w3-table w3-striped w3-hoverable">')
         html = html2.replace('<thead>', '<thead class="w3-black">')
         c['source'] = html
+    elif 'Pen' in line[0]:
+        colour = 'light-green'
+        symbol = 'pencil-square'
+        subtitle = line[0].split(':')
+        title = ':'.join(subtitle[1:])
+        body = '\n'.join(line[1:])
+        safetitle = title.replace(' ', '-')
+        safetitle = safetitle.replace('`', '')
+        index = urlquote(safetitle, safe='?!$\\') + '%0A'
+    elif 'Pin' in line[0]:
+        colour = 'orange'
+        symbol = 'pinterest-p'
+        subtitle = line[0].split(':')
+        title = ':'.join(subtitle[1:])
+        body = '\n'.join(line[1:])
+        safetitle = title.replace(' ', '-')
+        safetitle = safetitle.replace('`', '')
+        index = urlquote(safetitle, safe='?!$\\') + '%0A'
     else:
         colour = None
     
