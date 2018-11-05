@@ -160,7 +160,7 @@ for c in markdownlist:
         c['source'] = html
     elif 'Pen' in line[0]:
         colour = 'light-green'
-        symbol = 'pencil-square'
+        symbol = 'pencil'
         subtitle = line[0].split(':')
         title = ':'.join(subtitle[1:])
         body = '\n'.join(line[1:])
@@ -169,7 +169,7 @@ for c in markdownlist:
         index = urlquote(safetitle, safe='?!$\\') + '%0A'
     elif 'Pin' in line[0]:
         colour = 'orange'
-        symbol = 'pinterest-p'
+        symbol = 'thumbtack'
         subtitle = line[0].split(':')
         title = ':'.join(subtitle[1:])
         body = '\n'.join(line[1:])
