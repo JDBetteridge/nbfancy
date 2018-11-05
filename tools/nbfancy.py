@@ -169,7 +169,7 @@ for c in markdownlist:
         index = urlquote(safetitle, safe='?!$\\') + '%0A'
     elif 'Pin' in line[0]:
         colour = 'orange'
-        symbol = 'thumbtack'
+        symbol = 'thumb-tack'
         subtitle = line[0].split(':')
         title = ':'.join(subtitle[1:])
         body = '\n'.join(line[1:])
