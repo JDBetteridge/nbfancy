@@ -159,7 +159,7 @@ for c in markdownlist:
         html = html2.replace('<thead>', '<thead class="w3-black">')
         c['source'] = html
     elif 'Pen' in line[0]:
-        colour = 'light-green'
+        colour = 'yellow'
         symbol = 'pencil'
         subtitle = line[0].split(':')
         title = ':'.join(subtitle[1:])
@@ -168,7 +168,7 @@ for c in markdownlist:
         safetitle = safetitle.replace('`', '')
         index = urlquote(safetitle, safe='?!$\\') + '%0A'
     elif 'Pin' in line[0]:
-        colour = 'orange'
+        colour = 'blue'
         symbol = 'thumb-tack'
         subtitle = line[0].split(':')
         title = ':'.join(subtitle[1:])
