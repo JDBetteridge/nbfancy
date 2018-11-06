@@ -21,10 +21,14 @@ class bash2Magic(Magics):
         # Parse args
         args = parse_argstring(self.bash2, line)
         #print(args)
-        
+
         # Change to new working directory
         try:
             if args.dir is not None:
+
+                if args.dir[0] == "~":
+                    args.dir = args.dir.replace( "~",os.path.expanduser("~") )
+                
                 os.chdir(args.dir)
         except Exception as e:
             print(e)

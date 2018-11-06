@@ -9,6 +9,7 @@ RENDERED_DIR = $(ROOT_DIR)/notebooks_rendered
 HTML_DIR = $(ROOT_DIR)/html
 PDF_DIR = $(ROOT_DIR)/pdf
 IMAGE_DIR = $(ROOT_DIR)/images
+DATA_DIR = $(ROOT_DIR)/data
 
 # Files
 SRC_FILES = $(wildcard $(SRC_DIR)/*.ipynb)
@@ -86,12 +87,13 @@ $(HTML_DIR)/css.chk:
 	cp ./custom.css $(HTML_DIR)/custom.css
 	touch $(HTML_DIR)/css.chk
 
-#Create index for html and copy image directory to html build
+#Create index for html and copy image and data directory to html build
 $(HTML_DIR)/index.html:
 	$(PRINT)
 	pandoc $(ROOT_DIR)/README.md > $(HTML_DIR)/index.html
 	cat ./index_footer.html >> $(HTML_DIR)/index.html
 	cp -r $(IMAGE_DIR) $(HTML_DIR)/
+	if [ -e $(DATA_DIR) ]; then cp -r $(DATA_DIR) $(HTML_DIR)/; fi
 
 # HTML recipe
 .PRECIOUS: %.html
