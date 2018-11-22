@@ -177,7 +177,7 @@ for c in markdownlist:
         safetitle = safetitle.replace('`', '')
         index = urlquote(safetitle, safe='?!$\\') + '%0A'
     elif 'References' in line[0]:
-        colour = 'green'
+        colour = 'red'
         symbol = 'book'
         title = line[0].lstrip('#')
         body = '\n'.join(line[1:])
