@@ -92,7 +92,7 @@ $(HTML_DIR)/index.html:
 	$(PRINT)
 	pandoc $(ROOT_DIR)/README.md > $(HTML_DIR)/index.html
 	cat ./index_footer.html >> $(HTML_DIR)/index.html
-	cp -r $(IMAGE_DIR) $(HTML_DIR)/
+	if [ -e $(IMAGE_DIR) ]; then cp -r $(IMAGE_DIR) $(HTML_DIR)/; fi
 	if [ -e $(DATA_DIR) ]; then cp -r $(DATA_DIR) $(HTML_DIR)/; fi
 
 # HTML recipe
