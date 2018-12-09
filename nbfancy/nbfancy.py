@@ -2,18 +2,13 @@
 
 import argparse
 import os
-import pprint
 
 import nbformat as nf
 import nbconvert as nc
 
 from urllib.parse import quote as urlquote
 
-def isdir(path):
-    if not os.path.isdir(path):
-        raise OSError('"' + path + '"' + ' is not a direcotry')
-    else:
-        return path
+from nbfancy_tools import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('input',
@@ -37,32 +32,7 @@ parser.add_argument('--sourcedir',
                     help='Directory with existing notebook structure')
 args = parser.parse_args()
 
-def apply_template(colour, symbol, title, body, index=None):
-    template = '''
-<div class="w3-panel w3-leftbar w3-border-{colour} w3-pale-{colour} w3-padding-small">
-    <h3 id="{index}"><i class="fa fa-{symbol}"></i> {title}</h3>
-    {body}
-</div>
-'''
-    values = {  'colour' : colour,
-                'symbol' : symbol,
-                'title'  : title,
-                'body'   : body,
-                'index'  : index }
-    return template.format_map(values)
 
-# Colours
-# ~ green
-# ~ blue
-# ~ yellow
-
-# Symbols
-# ~ star
-# ~ file-o
-# ~ info-circle
-# ~ pencil-square-o
-# ~ eye
-# ~ key
 
 solnfilename = args.output.replace('.ipynb', '-soln.ipynb')
 solnflag = False
@@ -83,6 +53,30 @@ if args.headercell is not None:
 
 for c in markdownlist:
     line = c['source'].split('\n')
+    # if any(keyword in line[0].lower() for keyword in config.keys()):
+    #   htmltitle, index, key = box_title(line[0], config)
+        # Recover paramters from keyword
+        # ~ fg = config[key][0]
+        # ~ bg = config[key][1]
+        # ~ symbol = config[key][2]
+        # ~ hidden = config[key][4]
+    #   if hidden:
+    #       solnflag = True
+        # ~ if solnb is None:
+            # ~ solnb = nf.v4.new_notebook()
+            # ~ solnb['metadata'] = plain['metadata']
+            # ~ solnb['cells'].append(nf.v4.new_markdown_cell(source='# Solutions'))
+        
+        # ~ solnb['cells'].append(nf.v4.new_markdown_cell(source=''))
+        # ~ # REDEFINE c
+        # ~ solnb['cells'][-1] = c.copy()
+        # ~ plain['cells'].remove(c)
+        # ~ c = solnb['cells'][-1]
+    #       htmlbody = box_body(line[1:])
+    #   else:
+    #       link = './' + solnfilename.split('/')[-1] + index
+    #       htmlbody = box_body(line[1:], link)
+    #   c['source'] = apply_template(fg, bg, symbol, htmltitle, htmlbody, index)
     if 'Prerequisites' in line[0]:
         colour = 'green'
         symbol = 'star'
@@ -197,39 +191,6 @@ for c in markdownlist:
         htmlbody = temp.replace('_', '&lowbar;')
         
         c['source'] = apply_template(colour, symbol, htmltitle, htmlbody, index)
-
-def navigation_triple(directory, inputfile):
-    print('Directory: ', directory)
-    print('contains: ')
-    contents = os.listdir(directory)
-    contents.sort()
-    try:
-        # Remove checkpoints folder from list
-        contents.remove('.ipynb_checkpoints')
-    except ValueError:
-        pass
-    
-    # Remove solution files from index
-    contents = [f for f in contents if '-soln' not in f]
-    
-    for afile in contents:
-        print('          ', afile)
-    
-    contents.append(contents[0])
-    
-    current = inputfile.split('/')[-1]
-    # Exceptional case if you're making a new solution document
-    if '-soln' in current:
-        current = current.replace('-soln','')
-    
-    index = contents.index(current)
-    
-    outdir = './'
-    print('Navigation triple is: ', outdir+contents[index-1], outdir+contents[0], outdir+contents[index+1])
-    triple = {  'previous' : outdir+contents[index-1],
-                'index'    : outdir+contents[0],
-                'next'     : outdir+contents[index+1] }
-    return triple
 
 if args.footercell is not None:
     print('Reading from footercell: ' + args.footercell.name)

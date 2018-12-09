@@ -8,17 +8,14 @@ SRC_DIR = $(ROOT_DIR)/notebooks_plain
 RENDERED_DIR = $(ROOT_DIR)/notebooks_rendered
 HTML_DIR = $(ROOT_DIR)/html
 PDF_DIR = $(ROOT_DIR)/pdf
+
 IMAGE_DIR = $(ROOT_DIR)/images
 DATA_DIR = $(ROOT_DIR)/data
+CODE_DIR = $(ROOT_DIR)/code
 
 # Files
 SRC_FILES = $(wildcard $(SRC_DIR)/*.ipynb)
 RENDERED_FILES_TARGET = $(patsubst $(SRC_DIR)/%.ipynb,$(RENDERED_DIR)/%.ipynb,$(SRC_FILES))
-# Later now
-# RENDERED_FILES = $(shell ls $(RENDERED_DIR)/*.ipynb)
-#$(patsubst $(SRC_DIR)/%.ipynb,$(RENDERED_DIR)/%.ipynb,$(SRC_FILES))
-# HTML_FILES = $(patsubst $(RENDERED_DIR)/%.ipynb,%.html,$(RENDERED_FILES))
-# PDF_FILES = $(patsubst $(HTML_DIR)/%.html,%.pdf,$(HTML_FILES))
 
 # Compilers
 RENDERCC = python nbfancy.py
@@ -87,13 +84,12 @@ $(HTML_DIR)/css.chk:
 	cp ./custom.css $(HTML_DIR)/custom.css
 	touch $(HTML_DIR)/css.chk
 
-#Create index for html and copy image and data directory to html build
-$(HTML_DIR)/index.html:
+# Copy directories for CI deploy
+$(HTML_DIR)/copy.chk:
 	$(PRINT)
-	pandoc $(ROOT_DIR)/README.md > $(HTML_DIR)/index.html
-	cat ./index_footer.html >> $(HTML_DIR)/index.html
-	if [ -e $(IMAGE_DIR) ]; then cp -r $(IMAGE_DIR) $(HTML_DIR)/; fi
-	if [ -e $(DATA_DIR) ]; then cp -r $(DATA_DIR) $(HTML_DIR)/; fi
+	-cp -r $(IMAGE_DIR) $(HTML_DIR)/
+	-cp -r $(DATA_DIR) $(HTML_DIR)/
+	-cp -r $(CODE_DIR) $(HTML_DIR)/
 
 # HTML recipe
 .PRECIOUS: %.html
@@ -111,21 +107,6 @@ $(HTML_DIR)/%.html: $(RENDERED_DIR)/%.ipynb $(HTML_DIR)/css.chk
 	# Another hack since \n is converted to [space] in links
 	sed -i 's/%0A"/%20"/g' $(HTML_DIR)/$@
 
-        
-	
-# Hopefully removable
-# schedule HTML recipe (Correctly handles table)
-#~ .PRECIOUS: %.html
-#~ %.html: $(SRC_DIR)/%.ipynb $(HTML_DIR)/css.chk
-#~ 	$(NBCC) $(HFLAGS) --to=html --template=style_template.tpl --output-dir=$(HTML_DIR) $<
-#~ 	# Replace '.ipynb' in links with '.html'
-#~ 	sed -i 's/.ipynb/.html/g' $(HTML_DIR)/$@
-#~ 	# Horrible hack because <code> environment doesn't seem to work with CSS sheet
-#~ 	sed -i 's/<code>/<code style="background-color:#F7F7F7;border:1px solid #CFCFCF">/g' $(HTML_DIR)/$@
-#~ 	# Horrible hack to adjust the table
-#~ 	sed -i 's/<table>/<table class="w3-table w3-striped w3-hoverable">/g' $(HTML_DIR)/$@
-#~ 	sed -i 's/<thead>/<thead class="w3-black">/g' $(HTML_DIR)/$@
-
 # PDF recipe
 $(PDF_DIR)/%.pdf: $(HTML_DIR)/%.html
 	@echo $(HTML_DIR)
@@ -134,4 +115,4 @@ $(PDF_DIR)/%.pdf: $(HTML_DIR)/%.html
 
 # Purge all files
 clean:
-	-rm $(RENDERED_DIR)/*.ipynb $(HTML_DIR)/*.html $(PDF_DIR)/*.pdf
+	-rm $(RENDERED_DIR)/*.ipynb $(HTML_DIR)/*.html $(HTML_DIR)/copy.chk $(PDF_DIR)/*.pdf
