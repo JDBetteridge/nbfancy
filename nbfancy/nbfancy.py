@@ -10,6 +10,7 @@ from urllib.parse import quote as urlquote
 
 from nbfancy_tools import *
 
+# Parse all of the command line options
 parser = argparse.ArgumentParser()
 parser.add_argument('input',
                     type=argparse.FileType('r'),
@@ -27,7 +28,7 @@ parser.add_argument('--footercell',
                     type=argparse.FileType('r'),
                     help='Notebook containing footer for all notebooks')
 
-parser.add_argument('--config',
+parser.add_argument('--boxconfig',
                     type=argparse.FileType('r'),
                     help='Keyword configuration file')
 
@@ -41,31 +42,34 @@ parser.add_argument('--sourcedir',
 args = parser.parse_args()
 
 
-
+# Name the solution file
 solnfilename = args.output.replace('.ipynb', '-soln.ipynb')
 solnflag = False
+solnb = None
 
 print('Reading input file: ' + args.input.name)
 
+# Open notebook and list all the markdown cells
 plain = nf.read(args.input, nf.NO_CONVERT)
 celllist = plain['cells']
 markdownlist = [c for c in celllist if c['cell_type']=='markdown']
 
-solnb = None
-
+# Read in the header file
 if args.headercell is not None:
     print('Reading from headercell: ' + args.headercell.name)
     header = nf.read(args.headercell, nf.NO_CONVERT)
-    plain['cells'].insert(0, *header['cells'])
+    plain['cells'].insert(0, *header['cells'][1:])
     args.headercell.close()
-
-if args.config is not None:
-    print('Reading from config file: ' + args.config.name)
-    config = read_box_colour_config(args.config)
-    args.config.close()
+    
+# Read in the box config file
+if args.boxconfig is not None:
+    print('Reading from config file: ' + args.boxconfig.name)
+    config = read_box_colour_config(args.boxconfig)
+    args.boxconfig.close()
 else:
     config = {}
 
+# Read in the box cell template
 if args.boxcell is not None:
     print('Reading from box template: ' + args.boxcell.name)
     template = read_box_template(args.boxcell)
@@ -78,6 +82,8 @@ else:
 </div>
 '''
 
+# For each markdown cell check for keywords and format according to
+# the cell template and config files
 for c in markdownlist:
     line = c['source'].split('\n')
     if any(keyword in line[0].lower() for keyword in config.keys()):
@@ -117,7 +123,7 @@ for c in markdownlist:
                     }
         c['source'] = template.format_map(values)
     
-
+# Read in the footer file and add navigation
 if args.footercell is not None:
     print('Reading from footercell: ' + args.footercell.name)
     footer = nf.read(args.footercell, nf.NO_CONVERT)
@@ -125,15 +131,15 @@ if args.footercell is not None:
     triple = {'index' : './00_schedule.ipynb'} # Prevent error
     if args.sourcedir is not None:
         triple = navigation_triple(args.sourcedir, args.input.name)
-        for cell in footer['cells']:
-            #print(cell['source'].format_map(triple))
+        for cell in footer['cells'][1:]:
             cell['source'] = cell['source'].format_map(triple)
     
     inputname = './' + args.input.name.split('/')[-1]
     if triple['index'] != inputname:
-        plain['cells'].append(*footer['cells'])
+        plain['cells'].append(*footer['cells'][1:])
     args.footercell.close()
     
+# Write the new notebook to disk
 outfp = open(args.output, 'w')
 print('Writing output file: ' + args.output)
 plain['metadata']['celltoolbar'] = 'None'
@@ -142,6 +148,7 @@ nf.write(plain, outfp)
 args.input.close()
 outfp.close()
 
+# If needed also write the solutions notebook
 if solnflag:
     solfp = open(solnfilename, 'w')
     print('and also solution outputfile')

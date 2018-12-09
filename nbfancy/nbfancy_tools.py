@@ -171,6 +171,58 @@ def box_body(body, link=None):
     
     return htmlbody
 
+def direcotry_contents(directory):
+    '''
+    
+    '''
+    # Store contents of directory as list
+    contents = os.listdir(directory)
+    contents.sort()
+    try:
+        # Remove checkpoints folder from list
+        contents.remove('.ipynb_checkpoints')
+    except ValueError:
+        pass
+    
+    # Removes everything that isn't a notebook ending with .ipynb
+    contents = [f for f in contents if '.ipynb' in f]
+    
+    # Remove solution files from contents and store in seperate list
+    soln_contents = [f for f in contents if '-soln' in f]
+    contents = [f for f in contents if '-soln' not in f]
+    
+    # Print directory information
+    print('Directory: ', directory)
+    print('contains notebooks: ')
+    for afile in contents:
+        print('          ', afile)
+    
+    return contents, soln_contents
+
+def navigation_triple2(contents, filename):
+    '''Given a contents list and filename determines which file is
+    - previous lesson
+    - schedule
+    - next lesson
+    and returns these files as a dict
+    '''
+    # Make list loop, incase this is the last file
+    contents.append(contents[0])
+    
+    current = inputfile.split('/')[-1]
+    # Exceptional case if you're making custom solutions documents
+    if '-soln' in current:
+        current = current.replace('-soln','')
+    
+    index = contents.index(current)
+    
+    outdir = './'
+    print('Navigation triple is: ', outdir+contents[index-1], outdir+contents[0], outdir+contents[index+1])
+    triple = {  'previous' : outdir+contents[index-1],
+                'index'    : outdir+contents[0],
+                'next'     : outdir+contents[index+1] }
+    return triple
+
 def navigation_triple(directory, inputfile):
     '''Given a directory and file determines which file is
     - previous lesson
