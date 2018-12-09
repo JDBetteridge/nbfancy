@@ -14,15 +14,15 @@ def isdir(path):
     else:
         return path
 
-def read_box_template(filename):
-    '''Reads box template from given file
+def read_box_template(filehandle):
+    '''Reads box template from given file handle
     
     '''
+    # File is already open
     # Open file and extract text in second cell
-    with open(filename, 'r') as fh:
-        notebook = nf.read(fh, nf.NO_CONVERT)
-        box = notebook['cells'][1]
-        template = box['source']
+    notebook = nf.read(filehandle, nf.NO_CONVERT)
+    box = notebook['cells'][1]
+    template = box['source']
         
     # Replace known values with placeholders
     template = template.replace('pale-green', '{bg-colour}')
@@ -67,7 +67,7 @@ def colour2fgbg(colour):
     
     return fg, bg
 
-def read_box_colour_config(filename):
+def read_box_colour_config(filehandle):
     ''' Create a dict of configurations for each keyword in filename
     Lines starting with # are ignored as are blank lines
     
@@ -76,40 +76,43 @@ def read_box_colour_config(filename):
     false_words = ['FALSE', 'False', 'false', 'F', 'f', '0']
     
     config = dict()
-    with open(filename, 'r') as fh:
-        for line in fh.readlines():
-            line = line.lstrip()
-            if (line == ''):
-                pass
-            elif (line[0] == '#'):
-                pass
-            else:
-                parts = line.split(',')
-                
-                # Ensure keywords are lowercase
-                keyword = parts[0].strip().lower()
-                
-                # Convert colour to compatible foreground and background
-                fg, bg = colour2fgbg(parts[1].strip())
-                
-                symbol = parts[2].strip()
-                
-                # Keep printing keyword in titles
-                assert parts[3].strip() in true_words + false_words
-                keep = parts[3].strip() in true_words
-                
-                # Hide cell (useful for solutions)
-                assert parts[4].strip() in true_words + false_words
-                hidden = parts[4].strip() in true_words
-                
-                config[keyword] = [fg, bg, symbol, keep, hidden]
+    
+    for line in filehandle.readlines():
+        line = line.lstrip()
+        if (line == ''):
+            pass
+        elif (line[0] == '#'):
+            pass
+        else:
+            parts = line.split(',')
+            
+            # Ensure keywords are lowercase
+            keyword = parts[0].strip().lower()
+            
+            # Convert colour to compatible foreground and background
+            fg, bg = colour2fgbg(parts[1].strip())
+            
+            symbol = parts[2].strip()
+            
+            # Keep printing keyword in titles
+            assert parts[3].strip() in true_words + false_words
+            keep = parts[3].strip() in true_words
+            
+            # Hide cell (useful for solutions)
+            assert parts[4].strip() in true_words + false_words
+            hidden = parts[4].strip() in true_words
+            
+            config[keyword] = [fg, bg, symbol, keep, hidden]
     
     return config
 
 def box_title(line, config):
-    '''
+    '''Creates title for box.
+    Returns html formattted title, index and which keyword was found
     
     '''
+    keywords = config.keys()
+    
     # Search for keyword (lowercase) in first line and set that as the key
     for word in keywords:
         if word in line.lower():
@@ -141,7 +144,7 @@ def box_title(line, config):
     return htmltitle, index, key
     
 def box_body(body, link=None):
-    '''
+    '''Creates body of the box
     
     '''
     # If an empty link to a solution is found, populate it with link
@@ -151,7 +154,7 @@ def box_body(body, link=None):
         solution_phrase = body[-1][k:k+13]
         new_solution_phrase = '\n\n' + solution_phrase.replace('()','({link})')
         new_solution_phrase = new_solution_phrase.format(link=link)
-        body[-1].replace(solution_phrase, new_solution_phrase)
+        body[-1] = body[-1].replace(solution_phrase, new_solution_phrase)
         
     body = '\n'.join(body)
     
@@ -167,23 +170,6 @@ def box_body(body, link=None):
     htmlbody = htmlbody.replace('<thead>', '<thead class="w3-black">')
     
     return htmlbody
-
-def apply_template(colour, symbol, title, body, index=None):
-    '''Inserts text, colour and symbols to predefied template
-    
-    '''
-    template = '''
-<div class="w3-panel w3-leftbar w3-border-{colour} w3-pale-{colour} w3-padding-small">
-    <h3 id="{index}"><i class="fa fa-{symbol}"></i> {title}</h3>
-    {body}
-</div>
-'''
-    values = {  'colour' : colour,
-                'symbol' : symbol,
-                'title'  : title,
-                'body'   : body,
-                'index'  : index }
-    return template.format_map(values)
 
 def navigation_triple(directory, inputfile):
     '''Given a directory and file determines which file is

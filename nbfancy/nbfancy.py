@@ -26,6 +26,14 @@ parser.add_argument('--headercell',
 parser.add_argument('--footercell',
                     type=argparse.FileType('r'),
                     help='Notebook containing footer for all notebooks')
+
+parser.add_argument('--config',
+                    type=argparse.FileType('r'),
+                    help='Keyword configuration file')
+
+parser.add_argument('--boxcell',
+                    type=argparse.FileType('r'),
+                    help='Notebook containing "box" template')
                     
 parser.add_argument('--sourcedir',
                     type=isdir,
@@ -51,146 +59,64 @@ if args.headercell is not None:
     plain['cells'].insert(0, *header['cells'])
     args.headercell.close()
 
+if args.config is not None:
+    print('Reading from config file: ' + args.config.name)
+    config = read_box_colour_config(args.config)
+    args.config.close()
+else:
+    config = {}
+
+if args.boxcell is not None:
+    print('Reading from box template: ' + args.boxcell.name)
+    template = read_box_template(args.boxcell)
+    args.boxcell.close()
+else:
+    template = '''
+<div class="w3-panel w3-leftbar w3-border-{fg-colour} w3-pale-{bg-colour} w3-padding-small">
+    <h3 id="{index}"><i class="fa {symbol}"></i> {title}</h3>
+    {body}
+</div>
+'''
+
 for c in markdownlist:
     line = c['source'].split('\n')
-    # if any(keyword in line[0].lower() for keyword in config.keys()):
-    #   htmltitle, index, key = box_title(line[0], config)
+    if any(keyword in line[0].lower() for keyword in config.keys()):
+        htmltitle, index, key = box_title(line[0], config)
         # Recover paramters from keyword
-        # ~ fg = config[key][0]
-        # ~ bg = config[key][1]
-        # ~ symbol = config[key][2]
-        # ~ hidden = config[key][4]
-    #   if hidden:
-    #       solnflag = True
-        # ~ if solnb is None:
-            # ~ solnb = nf.v4.new_notebook()
-            # ~ solnb['metadata'] = plain['metadata']
-            # ~ solnb['cells'].append(nf.v4.new_markdown_cell(source='# Solutions'))
+        fg = config[key][0]
+        bg = config[key][1]
+        symbol = config[key][2]
+        hidden = config[key][4]
         
-        # ~ solnb['cells'].append(nf.v4.new_markdown_cell(source=''))
-        # ~ # REDEFINE c
-        # ~ solnb['cells'][-1] = c.copy()
-        # ~ plain['cells'].remove(c)
-        # ~ c = solnb['cells'][-1]
-    #       htmlbody = box_body(line[1:])
-    #   else:
-    #       link = './' + solnfilename.split('/')[-1] + index
-    #       htmlbody = box_body(line[1:], link)
-    #   c['source'] = apply_template(fg, bg, symbol, htmltitle, htmlbody, index)
-    if 'Prerequisites' in line[0]:
-        colour = 'green'
-        symbol = 'star'
-        title = line[0].lstrip('#')
-        body = '\n'.join(line[1:])
-        safetitle = title.replace(' ', '-')
-        safetitle = safetitle.replace('`', '')
-        index = urlquote(safetitle, safe='?!$\\') + '%0A'
-    elif 'Overview' in line[0]:
-        colour = 'green'
-        symbol = 'file-o'
-        title = line[0].lstrip('#')
-        body = '\n'.join(line[1:])
-        safetitle = title.replace(' ', '-')
-        safetitle = safetitle.replace('`', '')
-        index = urlquote(safetitle, safe='?!$\\') + '%0A'
-    elif 'Info' in line[0]:
-        colour = 'blue'
-        symbol = 'info-circle'
-        subtitle = line[0].split(':')
-        title = ':'.join(subtitle[1:])
-        body = '\n'.join(line[1:])
-        safetitle = title.replace(' ', '-')
-        safetitle = safetitle.replace('`', '')
-        index = urlquote(safetitle, safe='?!$\\') + '%0A'
-    elif 'Exercise' in line[0]:
-        colour = 'yellow'
-        symbol = 'pencil-square-o'
-        subtitle = line[0].split(':')
-        title = ':'.join(subtitle[1:])
-        body = '\n'.join(line[1:])
-        safetitle = title.replace(' ', '-')
-        safetitle = safetitle.replace('`', '')
-        link = './' + solnfilename.split('/')[-1] + '#' + urlquote(safetitle, safe='?!$\\') + '%0A'
-        #print(link)
-        body += '\n\n [Solution]({link})'.format(link=link)
-        safetitle = title.replace(' ', '-')
-        safetitle = safetitle.replace('`', '')
-        index = urlquote(safetitle, safe='?!$\\') + '%0A'
-    elif 'Solution' in line[0]:
-        solnflag = True
-        if solnb is None:
-            solnb = nf.v4.new_notebook()
-            solnb['metadata'] = plain['metadata']
-            solnb['cells'].append(nf.v4.new_markdown_cell(source='# Solutions'))
+        # If hidden move cell to new notebook
+        if hidden:
+            solnflag = True
+            
+            # Make a new notebook if it doesn't exist already
+            if solnb is None:
+                solnb = nf.v4.new_notebook()
+                solnb['metadata'] = plain['metadata']
+                solnb['cells'].append(nf.v4.new_markdown_cell(source='# Solutions'))
+            
+            solnb['cells'].append(nf.v4.new_markdown_cell(source=''))
+            # REDEFINE c
+            solnb['cells'][-1] = c.copy()
+            plain['cells'].remove(c)
+            c = solnb['cells'][-1]
+            htmlbody = box_body(line[1:])
+        else:
+            link = './' + solnfilename.split('/')[-1] + '#' + index
+            htmlbody = box_body(line[1:], link)
         
-        solnb['cells'].append(nf.v4.new_markdown_cell(source=''))
-        # REDEFINE c
-        solnb['cells'][-1] = c.copy()
-        plain['cells'].remove(c)
-        c = solnb['cells'][-1]
-        
-        colour = 'blue'
-        symbol = 'eye'
-        subtitle = line[0].split(':')
-        title = ':'.join(subtitle[1:])
-        body = '\n'.join(line[1:])
-        safetitle = title.replace(' ', '-')
-        safetitle = safetitle.replace('`', '')
-        index = urlquote(safetitle, safe='?!$\\') + ' '
-    elif 'Key Points' in line[0]:
-        colour = 'green'
-        symbol = 'key'
-        title = line[0].lstrip('#')
-        body = '\n'.join(line[1:])
-        safetitle = title.replace(' ', '-')
-        safetitle = safetitle.replace('`', '')
-        index = urlquote(safetitle, safe='?!$\\') + ' '
-    elif 'Schedule' in line[0]:
-        colour = None
-        body = '\n'.join(line)
-        html = nc.filters.markdown2html(body)
-        html2 = html.replace('<table>', '<table class="w3-table w3-striped w3-hoverable">')
-        html = html2.replace('<thead>', '<thead class="w3-black">')
-        c['source'] = html
-    elif 'Pen' in line[0]:
-        colour = 'yellow'
-        symbol = 'pencil'
-        subtitle = line[0].split(':')
-        title = ':'.join(subtitle[1:])
-        body = '\n'.join(line[1:])
-        safetitle = title.replace(' ', '-')
-        safetitle = safetitle.replace('`', '')
-        index = urlquote(safetitle, safe='?!$\\') + '%0A'
-    elif 'Pin' in line[0]:
-        colour = 'blue'
-        symbol = 'thumb-tack'
-        subtitle = line[0].split(':')
-        title = ':'.join(subtitle[1:])
-        body = '\n'.join(line[1:])
-        safetitle = title.replace(' ', '-')
-        safetitle = safetitle.replace('`', '')
-        index = urlquote(safetitle, safe='?!$\\') + '%0A'
-    elif 'References' in line[0]:
-        colour = 'red'
-        symbol = 'book'
-        title = line[0].lstrip('#')
-        body = '\n'.join(line[1:])
-        safetitle = title.replace(' ', '-')
-        safetitle = safetitle.replace('`', '')
-        index = urlquote(safetitle, safe='?!$\\') + ' '
-    else:
-        colour = None
+        values = {  'fg-colour' : fg,
+                    'bg-colour' : bg,
+                    'index'     : index,
+                    'symbol'    : symbol,
+                    'title'     : htmltitle,
+                    'body'      : htmlbody
+                    }
+        c['source'] = template.format_map(values)
     
-    if colour is not None:
-        htmltitle = nc.filters.markdown2html(title)
-        temp = htmltitle.replace('<p>', '')
-        htmltitle = temp.replace('</p>', '')
-        
-        htmlbody = nc.filters.markdown2html(body)
-        temp = htmlbody.replace('*', '&ast;')
-        htmlbody = temp.replace('_', '&lowbar;')
-        
-        c['source'] = apply_template(colour, symbol, htmltitle, htmlbody, index)
 
 if args.footercell is not None:
     print('Reading from footercell: ' + args.footercell.name)
