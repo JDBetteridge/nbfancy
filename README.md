@@ -1,4 +1,6 @@
-# Template Tutorial
+# This is the README
+
+## Template Tutorial
 
 (C) Jack Betteridge (j.d.betteridge@bath.ac.uk) and James Grant (r.j.grant@bath.ac.uk)
 
@@ -7,7 +9,7 @@ It consists of a series of episodes which instruct how to use the build-system, 
 In addition to acting as a tutorial for using the template the repository also serves as the development sandpit for the build system (currently).
 Instructions on how to fork, update and build your course locally and online are given in the tutorial.
 
-## The template
+### The template
 
 The template consists of a set of `tools` which make up the build system, and example, tutorial material `notebooks-plain`.
 If you would like to contribute to the build system please see the notes below, the tutorially is principally aimed at users who will be developing courses.
@@ -22,6 +24,6 @@ In order to retain this richness we created a build system to process initial no
 As a result this template tutorial has been created to assist users in creating their own courses, as both an lesson and demonstration of its use.
 The tutorial is available online in [rendered html](https://james-grant1.github.io/template-tutorial/00\_schedule.html)
 
-## Contributions to the build system
+### Contributions to the build system
 
 If you would like to contribute to the build system please fork the repository and create a pull request against the build-dev branch.

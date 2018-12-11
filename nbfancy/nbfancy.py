@@ -19,6 +19,10 @@ parser.add_argument('input',
 parser.add_argument('output',
                     type=str,
                     help='Name of fancy notebook to output')
+
+parser.add_argument('-c', '--config',
+                    type=str,
+                    help='Name of fancy notebook directory to use')
                     
 parser.add_argument('--headercell',
                     type=argparse.FileType('r'),
@@ -39,6 +43,10 @@ parser.add_argument('--boxcell',
 parser.add_argument('--sourcedir',
                     type=isdir,
                     help='Directory with existing notebook structure')
+
+parser.add_argument('-o', '--outputdir',
+                    type=str,
+                    help='Name of fancy notebook directory to use')
 args = parser.parse_args()
 
 
