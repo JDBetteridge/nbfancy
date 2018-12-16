@@ -8,8 +8,11 @@ setuptools.setup(
     version='0.1dev',
     author='Jack Betteridge',
     packages=setuptools.find_packages(),
-    scripts=['nbfancy.py'],
-
+    entry_points={
+        'console_scripts': [
+            'nbfancy=nbfancy.__main__:main',
+        ],
+    },
     author_email='J.D.Betteridge@Bath.ac.uk',
     description='Tools for rendering notebooks suitable for teaching',
     long_description=long_description,
