@@ -17,13 +17,6 @@ setuptools.setup(
     author='Jack Betteridge',
     packages=setuptools.find_packages(),
     py_modules=['configure'],
-    ## TODO: replace with a MANIFEST.in
-    package_data={
-        'nbfancy' : ['tools/custom.css',
-                     'tools/css/w3.css',
-                     'tools/css/font-awesome.css',
-                     'tools/css/fontawesome-webfont.ttf'],
-    },
     install_requires = ['ipython>=6','jupyter',],
     entry_points={
         'console_scripts': [
