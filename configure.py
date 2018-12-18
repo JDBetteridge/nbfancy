@@ -1,13 +1,13 @@
 import os
+import sys
 from tempfile import mkstemp
-from shutil import move
+from shutil import move, copy, copytree
 
 from IPython import start_ipython
 from IPython.paths import locate_profile
 from IPython.core.profiledir import ProfileDirError
 
 from jupyter_core.paths import jupyter_config_dir
-from shutil import copy, copytree
 
 def replace(filename, pattern, subst):
     ''' Replaces one string with another in config file
@@ -103,5 +103,11 @@ def jupyter():
     
     # Copy our custom CSS file to the path
     copy(css_file, custom_css_path)
-    # TODO: Add try catch block here
-    copytree(css_dir, os.path.join(custom_dir, 'css'))
+    try:
+        copytree(css_dir, os.path.join(custom_dir, 'css'))
+    except FileExistsError as e:
+        ## TODO: Still not satisfactory as messages not seen on pip install
+        print('ERROR: You already have a directory named')
+        print(os.path.join(custom_dir, 'css'))
+        print('Remove or rename and try again.')
+        print('Install will continue, on the assumption that these files are left over from a previous build.')
