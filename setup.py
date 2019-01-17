@@ -27,7 +27,7 @@ setuptools.setup(
     description='Tools for rendering notebooks suitable for teaching',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/JDBetteridge/nbfancy-tools',
+    url='https://github.com/JDBetteridge/nbfancy',
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
