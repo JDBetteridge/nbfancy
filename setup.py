@@ -14,10 +14,16 @@ with open('README.md', 'r') as fh:
 #    configure.jupyter()
 
 setuptools.setup(
-    name='nbfancy-tools',
+    name='nbfancy',
     version='0.1dev0',
     author='Jack Betteridge',
     packages=setuptools.find_packages(),
+    package_data = {
+        'nbfancy/config'    : ['*.ipynb', '*.cfg'],
+        'nbfancy/tools'     : ['custom.css'],
+        'nbfancy/tools/css' : ['*']
+    },
+    include_package_data=True,
     py_modules=['configure'],
     install_requires = ['ipython>=6','jupyter',],
     entry_points={
@@ -32,7 +38,7 @@ setuptools.setup(
     url='https://github.com/JDBetteridge/nbfancy',
     classifiers=[
         'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: BSD-3-Clause',
-        'Operating System :: Linux',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: POSIX :: Linux',
     ],
 )

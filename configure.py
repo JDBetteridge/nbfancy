@@ -1,5 +1,4 @@
 import os
-import sys
 from tempfile import mkstemp
 from shutil import move, copy, copytree
 
@@ -97,6 +96,7 @@ def jupyter():
             os.mkdir(custom_dir)
     
     # Get our current working directory
+    ## TODO: Modify for post install configuration
     cwd = os.getcwd()
     css_file = os.path.join(cwd, 'nbfancy', 'tools', 'custom.css')
     css_dir = os.path.join(cwd, 'nbfancy', 'tools', 'css')
