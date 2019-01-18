@@ -75,7 +75,7 @@ def ipython():
         fh.writelines(config_line)
         fh.close()
     
-    # fh should be closed here
+    # fh should be closed before here
     
 def jupyter():
     '''Configuration for Jupyter
@@ -106,7 +106,6 @@ def jupyter():
     try:
         copytree(css_dir, os.path.join(custom_dir, 'css'))
     except FileExistsError as e:
-        ## TODO: Still not satisfactory as messages not seen on pip install
         print('ERROR: You already have a directory named')
         print(os.path.join(custom_dir, 'css'))
         print('Remove or rename and try again.')

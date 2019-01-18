@@ -1,5 +1,5 @@
-import sys
-import configure
+#import sys
+#import configure
 import setuptools
 
 # Long description comes from README file
@@ -7,9 +7,11 @@ with open('README.md', 'r') as fh:
     long_description = fh.read()
 
 # When installing need to change setting in IPython and Jupyter
-if 'install' in sys.argv:
-    configure.ipython()
-    configure.jupyter()
+# Since this affects users global config, this will now be handled
+# post install
+#if 'install' in sys.argv:
+#    configure.ipython()
+#    configure.jupyter()
 
 setuptools.setup(
     name='nbfancy-tools',
