@@ -30,7 +30,7 @@ setuptools.setup(
     url='https://github.com/JDBetteridge/nbfancy',
     classifiers=[
         'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: BSD-3-Clause',
         'Operating System :: Linux',
     ],
 )

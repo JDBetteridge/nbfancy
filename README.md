@@ -1,6 +1,6 @@
 # NBfancy
 
-(C) Jack Betteridge (j.d.betteridge@bath.ac.uk) and James Grant (r.j.grant@bath.ac.uk)
+(C) 2019 Jack Betteridge (j.d.betteridge@bath.ac.uk) and James Grant (r.j.grant@bath.ac.uk)
 
 This repository contains NBfancy,
 a tool for adding decoration and extended features to Jupyter notebooks.
