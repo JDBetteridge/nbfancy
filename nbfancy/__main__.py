@@ -105,13 +105,13 @@ def configure(args):
                 'is not configured to work on your system')
 
 def render(args):
-    '''
-    
+    ''' Render plain notebooks as fancy notebooks
     '''
     parser = argparse.ArgumentParser()
     parser.prog += ' ' + sys.argv[1]
     parser.add_argument('input_dir',
                         type=str,
+                        default='nbplain',
                         help='Plain notebook directory')
     parser.add_argument('--output_dir',
                         type=str,
@@ -119,6 +119,7 @@ def render(args):
                         help='Name of fancy notebook to output')
     parser.add_argument('-c', '--config',
                         type=str,
+                        default='config',
                         help='Custom configuration directory')
     args, unknown = parser.parse_known_args(sys.argv[2:])
     
@@ -126,14 +127,29 @@ def render(args):
         print(args.input_dir)
 
 def html(args):
+    ''' Publish fancy (or even plain) notebooks as html
     '''
+    parser = argparse.ArgumentParser()
+    parser.prog += ' ' + sys.argv[1]
+    parser.add_argument('input_dir',
+                        type=str,
+                        default='nbfancy',
+                        help='Fancy notebook directory')
+    parser.add_argument('--output_dir',
+                        type=str,
+                        default='html',
+                        help='Name of html directory to output')
+    parser.add_argument('-c', '--config',
+                        type=str,
+                        default='config',
+                        help='Custom configuration directory')
+    args, unknown = parser.parse_known_args(sys.argv[2:])
     
-    '''
-    pass
+    if os.path.isdir(args.input_dir):
+        print(args.input_dir)
 
 def main():
-    ''' Checks for the verb used with nbfancy
-    
+    ''' Checks for the verb used with nbfancy command
     '''
     # Parse all of the command line options
     parser = argparse.ArgumentParser()
