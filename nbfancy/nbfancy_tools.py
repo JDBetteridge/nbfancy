@@ -77,6 +77,13 @@ def read_box_colour_config(filehandle):
     
     config = dict()
     
+    # ~ with open('keywords.cfg','r') as fh:
+        # ~ no_comments = filter(lambda line: len(line)>3 and line.lstrip()[0]!='#' , fh)
+        # ~ reader = csv.DictReader(no_comments)
+        # ~ stuff = []
+        # ~ for row in reader:
+            # ~ stuff.append(row)
+    
     for line in filehandle.readlines():
         line = line.lstrip()
         if (line == ''):
