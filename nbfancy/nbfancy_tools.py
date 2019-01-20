@@ -23,7 +23,7 @@ def read_box_template(filehandle):
     notebook = nf.read(filehandle, nf.NO_CONVERT)
     box = notebook['cells'][1]
     template = box['source']
-        
+    
     # Replace known values with placeholders
     template = template.replace('pale-green', '{bg-colour}')
     template = template.replace('green', '{fg-colour}')
