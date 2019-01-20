@@ -1,5 +1,5 @@
 #import sys
-#import configure
+#from nbfancy import configure
 import setuptools
 
 # Long description comes from README file

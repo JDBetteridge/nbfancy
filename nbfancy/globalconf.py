@@ -1,4 +1,6 @@
 import os
+import pkg_resources
+
 from tempfile import mkstemp
 from shutil import move, copy, copytree
 
@@ -95,16 +97,14 @@ def jupyter():
         if not os.path.isdir(custom_dir):
             os.mkdir(custom_dir)
     
-    # Get our current working directory
-    ## TODO: Modify for post install configuration
-    cwd = os.getcwd()
-    css_file = os.path.join(cwd, 'nbfancy', 'tools', 'custom.css')
-    css_dir = os.path.join(cwd, 'nbfancy', 'tools', 'css')
+    resource_package = 'nbfancy'
+    config_path = '/tools'  # Do not use os.path.join()
+    css_dir = pkg_resources.resource_filename(resource_package, config_path)
     
     # Copy our custom CSS file to the path
-    copy(css_file, custom_css_path)
+    copy(os.path.join(css_dir, 'custom.css'), custom_css_path)
     try:
-        copytree(css_dir, os.path.join(custom_dir, 'css'))
+        copytree(os.path.join(css_dir, 'css'), os.path.join(custom_dir, 'css'))
     except FileExistsError as e:
         print('ERROR: You already have a directory named')
         print(os.path.join(custom_dir, 'css'))
