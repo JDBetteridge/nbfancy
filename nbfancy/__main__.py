@@ -55,16 +55,26 @@ def init(args):
         template_path = '/tutorial'  # Do not use os.path.join()
         source = pkg_resources.resource_filename(resource_package, template_path)
         target = os.path.join(cwd, 'nbplain')
-        copytree(source, target)
+        try:
+            copytree(source, target)
+        except FileExistsError:
+            print('Directory', target, 'already exists')
     elif args.include == 'template':
         template_path = '/template'  # Do not use os.path.join()
         source = pkg_resources.resource_filename(resource_package, template_path)
         target = os.path.join(cwd, 'nbplain')
-        copytree(source, target)
+        try:
+            copytree(source, target)
+        except FileExistsError:
+            print('Directory', target, 'already exists')
     else:
         make_dir = os.path.join(cwd, 'nbplain')
         if not os.path.isdir(make_dir):
-            os.mkdir(make_dir)
+            try:
+                os.mkdir(make_dir)
+            except FileExistsError:
+                print('Directory', target, 'already exists')
+                
     
 def configure(args):
     '''Sets up global config
