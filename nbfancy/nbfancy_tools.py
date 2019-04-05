@@ -178,7 +178,7 @@ def box_body(body, link=None):
     
     return htmlbody
 
-def direcotry_contents(directory):
+def directory_contents(directory):
     '''
     
     '''
