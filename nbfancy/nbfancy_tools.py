@@ -1,4 +1,5 @@
 import os
+import csv
 
 import nbformat as nf
 import nbconvert as nc
@@ -14,10 +15,57 @@ def isdir(path):
     else:
         return path
 
-def read_box_template(filehandle):
+def try_config(configdir, filename):
+    ''' Tries to read specified config, else uses global config
+    returns file handle to requested file
+    
+    '''
+    resource_package = 'nbfancy'
+    config_path = '/config'  # Do not use os.path.join()
+    
+    if not os.path.isdir(configdir):
+        configdir = pkg_resources.resource_filename(resource_package, config_path)
+    
+    try:
+        filename = os.path.join(configdir, filename)
+        filehandle = open(filename, 'r')
+    except e:
+        configdir = pkg_resources.resource_filename(resource_package, config_path)
+        filename = os.path.join(configdir, filename)
+        filehandle = open(filename, 'r')
+    
+    return filehandle
+
+def read_header(configdir):
+    '''Reads header from config directory
+    
+    '''
+    # Open file and extract text in second cell
+    with try_config(configdir, 'header.ipynb') as fh:
+        notebook = nf.read(fh, nf.NO_CONVERT)
+        box = notebook['cells'][1]
+        template = box['source']
+    
+    return template
+    
+def read_footer(configdir):
+    '''Reads footer from config directory
+    
+    '''
+    # Open file and extract text in second cell
+    with try_config(configdir, 'footer.ipynb') as fh:
+        notebook = nf.read(fh, nf.NO_CONVERT)
+        box = notebook['cells'][1]
+        template = box['source']
+    
+    return template
+
+def read_box_template(configdir):
     '''Reads box template from given file handle
     
     '''
+    filehandle = try_config(configdir, 'box.ipynb')
+    
     # File is already open
     # Open file and extract text in second cell
     notebook = nf.read(filehandle, nf.NO_CONVERT)
@@ -38,6 +86,7 @@ def colour2fgbg(colour):
     
     '''
     colour = colour.lower()
+    print(colour)
     colour_list = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'] 
     colour_list += ['brown', 'black', 'grey', 'gray', 'white']
     assert colour in colour_list
@@ -67,7 +116,7 @@ def colour2fgbg(colour):
     
     return fg, bg
 
-def read_box_colour_config(filehandle):
+def read_box_colour_config(configdir):
     ''' Create a dict of configurations for each keyword in filename
     Lines starting with # are ignored as are blank lines
     
@@ -77,39 +126,39 @@ def read_box_colour_config(filehandle):
     
     config = dict()
     
-    # ~ with open('keywords.cfg','r') as fh:
-        # ~ no_comments = filter(lambda line: len(line)>3 and line.lstrip()[0]!='#' , fh)
-        # ~ reader = csv.DictReader(no_comments)
-        # ~ stuff = []
-        # ~ for row in reader:
-            # ~ stuff.append(row)
+    with try_config(configdir, 'keywords.cfg') as fh:
+        no_comments = filter(lambda line: len(line)>3 and line.lstrip()[0]!='#' , fh)
+        reader = csv.DictReader(no_comments)
+        for row in reader:
+            key = row.pop('Keyword')
+            config[key] = row
     
-    for line in filehandle.readlines():
-        line = line.lstrip()
-        if (line == ''):
-            pass
-        elif (line[0] == '#'):
-            pass
-        else:
-            parts = line.split(',')
+    #~ for line in filehandle.readlines():
+        #~ line = line.lstrip()
+        #~ if (line == ''):
+            #~ pass
+        #~ elif (line[0] == '#'):
+            #~ pass
+        #~ else:
+            #~ parts = line.split(',')
             
-            # Ensure keywords are lowercase
-            keyword = parts[0].strip().lower()
+            #~ # Ensure keywords are lowercase
+            #~ keyword = parts[0].strip().lower()
             
-            # Convert colour to compatible foreground and background
-            fg, bg = colour2fgbg(parts[1].strip())
+            #~ # Convert colour to compatible foreground and background
+            #~ fg, bg = colour2fgbg(parts[1].strip())
             
-            symbol = parts[2].strip()
+            #~ symbol = parts[2].strip()
             
-            # Keep printing keyword in titles
-            assert parts[3].strip() in true_words + false_words
-            keep = parts[3].strip() in true_words
+            #~ # Keep printing keyword in titles
+            #~ assert parts[3].strip() in true_words + false_words
+            #~ keep = parts[3].strip() in true_words
             
-            # Hide cell (useful for solutions)
-            assert parts[4].strip() in true_words + false_words
-            hidden = parts[4].strip() in true_words
+            #~ # Hide cell (useful for solutions)
+            #~ assert parts[4].strip() in true_words + false_words
+            #~ hidden = parts[4].strip() in true_words
             
-            config[keyword] = [fg, bg, symbol, keep, hidden]
+            #~ config[keyword] = [fg, bg, symbol, keep, hidden]
     
     return config
 

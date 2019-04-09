@@ -60,7 +60,7 @@ print('Reading input file: ' + args.input.name)
 # Open notebook and list all the markdown cells
 plain = nf.read(args.input, nf.NO_CONVERT)
 celllist = plain['cells']
-markdownlist = [c for c in celllist if c['cell_type']=='markdown']
+markdownlist = [c for c in celllist if c['cell_type'] == 'markdown']
 
 # Read in the header file
 if args.headercell is not None:

@@ -143,12 +143,18 @@ def render(args):
     if os.path.isdir(args.input_dir):
         contents, solution_contents = nbftools.directory_contents(args.input_dir)
         
-        if args.config: # Specified config
-            pass
-        elif 0: # Config directory present
-            pass
-        else: # Global defaults
-            pass
+        # Use config if specified, both fallback to global if error
+        if args.config:
+            configdir = args.config
+        else:
+            configdir = os.path.join(args.inputdir, 'config')
+        
+        # Read in the header, box config, box template and footer file
+        header = nbftools.read_header(configdir)
+        template = nbftools.read_box_template(configdir)
+        config = nbftools.read_box_colour_config(configdir)
+        print(config)
+        footer = nbftools.read_footer(configdir)
         
         #~ # Read in the header file
         #~ if args.headercell is not None:
