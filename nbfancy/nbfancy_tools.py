@@ -1,5 +1,6 @@
 import os
 import csv
+import pkg_resources
 
 import nbformat as nf
 import nbconvert as nc
@@ -27,12 +28,12 @@ def try_config(configdir, filename):
         configdir = pkg_resources.resource_filename(resource_package, config_path)
     
     try:
-        filename = os.path.join(configdir, filename)
-        filehandle = open(filename, 'r')
-    except e:
+        filepath = os.path.join(configdir, filename)
+        filehandle = open(filepath, 'r')
+    except FileNotFoundError:
         configdir = pkg_resources.resource_filename(resource_package, config_path)
-        filename = os.path.join(configdir, filename)
-        filehandle = open(filename, 'r')
+        filepath = os.path.join(configdir, filename)
+        filehandle = open(filepath, 'r')
     
     return filehandle
 
@@ -86,7 +87,6 @@ def colour2fgbg(colour):
     
     '''
     colour = colour.lower()
-    print(colour)
     colour_list = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'] 
     colour_list += ['brown', 'black', 'grey', 'gray', 'white']
     assert colour in colour_list
@@ -121,17 +121,29 @@ def read_box_colour_config(configdir):
     Lines starting with # are ignored as are blank lines
     
     '''
-    true_words = ['TRUE', 'True', 'true', 'T', 't', '1']
-    false_words = ['FALSE', 'False', 'false', 'F', 'f', '0']
-    
     config = dict()
+    
+    def isTF(val):
+        ''' Return true or false if val is boolean
+        
+        '''
+        true_words = ['true', 't', '1']
+        false_words = ['false', 'f', '0']
+        test_val = val.strip().lower()
+        if test_val in true_words:
+            test_val = True
+        elif test_val in false_words:
+            test_val = False
+        return test_val
     
     with try_config(configdir, 'keywords.cfg') as fh:
         no_comments = filter(lambda line: len(line)>3 and line.lstrip()[0]!='#' , fh)
         reader = csv.DictReader(no_comments)
         for row in reader:
             key = row.pop('Keyword')
-            config[key] = row
+            row_dict = {key.strip().lower() : isTF(row[key]) for key in row}
+            row_dict['fg-colour'], row_dict['bg-colour'] = colour2fgbg(row_dict['colour'])
+            config[key.strip().lower()] = row_dict
     
     #~ for line in filehandle.readlines():
         #~ line = line.lstrip()
@@ -175,8 +187,8 @@ def box_title(line, config):
             key = word
     
     # Recover paramters from keyword
-    keep_keyword = config[key][3]
-    hidden = config[key][4]
+    keep_keyword = config[key]['keep_keyword']
+    hidden = config[key]['hide']
     
     # Whether to print keyword in title
     if keep_keyword:
@@ -199,7 +211,7 @@ def box_title(line, config):
     
     return htmltitle, index, key
     
-def box_body(body, link=None):
+def box_body(body, config, link=None):
     '''Creates body of the box
     
     '''

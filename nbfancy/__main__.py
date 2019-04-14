@@ -75,7 +75,7 @@ def init(args):
             try:
                 os.mkdir(make_dir)
             except FileExistsError:
-                print('Directory', target, 'already exists')
+                print('Directory', make_dir, 'already exists')
                 
     
 def configure(args):
@@ -156,6 +156,14 @@ def render(args):
         print(config)
         footer = nbftools.read_footer(configdir)
         
+        # Create output directory
+        rendered_dir = args.output_dir
+        if not os.path.isdir(args.output_dir):
+            try:
+                os.mkdir(rendered_dir)
+            except FileExistsError:
+                print('Directory', rendered_dir, 'already exists')
+        
         #~ # Read in the header file
         #~ if args.headercell is not None:
             #~ print('Reading from headercell: ' + args.headercell.name)
@@ -202,76 +210,75 @@ def render(args):
         # the cell template and config files
         for c in markdownlist:
             line = c['source'].split('\n')
-            #~ if any(keyword in line[0].lower() for keyword in config.keys()):
-                #~ htmltitle, index, key = box_title(line[0], config)
-                #~ # Recover paramters from keyword
-                #~ fg = config[key][0]
-                #~ bg = config[key][1]
-                #~ symbol = config[key][2]
-                #~ hidden = config[key][4]
+            if any(keyword in line[0].lower() for keyword in config.keys()):
+                htmltitle, index, key = nbftools.box_title(line[0], config)
+                # Recover paramters from keyword
+                hidden = config[key]['hide']
                 
-                #~ # If hidden move cell to new notebook
-                #~ if hidden:
-                    #~ solnflag = True
+                # If hidden move cell to new notebook
+                if hidden:
+                    solnflag = True
                     
-                    #~ # Make a new notebook if it doesn't exist already
-                    #~ if solnb is None:
-                        #~ solnb = nf.v4.new_notebook()
-                        #~ solnb['metadata'] = plain['metadata']
-                        #~ solnb['cells'].append(nf.v4.new_markdown_cell(source='# Solutions'))
+                    # Make a new notebook if it doesn't exist already
+                    if solnb is None:
+                        solnb = nf.v4.new_notebook()
+                        solnb['metadata'] = plain['metadata']
+                        solnb['cells'].append(nf.v4.new_markdown_cell(source='# Solutions'))
                     
-                    #~ solnb['cells'].append(nf.v4.new_markdown_cell(source=''))
-                    #~ # REDEFINE c
-                    #~ solnb['cells'][-1] = c.copy()
-                    #~ plain['cells'].remove(c)
-                    #~ c = solnb['cells'][-1]
-                    #~ htmlbody = box_body(line[1:])
-                #~ else:
-                    #~ link = './' + solnfilename.split('/')[-1] + '#' + index
-                    #~ htmlbody = box_body(line[1:], link)
+                    solnb['cells'].append(nf.v4.new_markdown_cell(source=''))
+                    # REDEFINE c
+                    solnb['cells'][-1] = c.copy()
+                    plain['cells'].remove(c)
+                    c = solnb['cells'][-1]
+                    htmlbody = nbftools.box_body(line[1:], config[key])
+                else:
+                    link = './' + solnfilename.split('/')[-1] + '#' + index
+                    htmlbody = nbftools.box_body(line[1:], config[key], link)
                 
-                #~ values = {  'fg-colour' : fg,
-                            #~ 'bg-colour' : bg,
-                            #~ 'index'     : index,
-                            #~ 'symbol'    : symbol,
-                            #~ 'title'     : htmltitle,
-                            #~ 'body'      : htmlbody
-                            #~ }
-                #~ c['source'] = template.format_map(values)
+                # ~ values = {  'fg-colour' : fg,
+                            # ~ 'bg-colour' : bg,
+                            # ~ 'index'     : index,
+                            # ~ 'symbol'    : symbol,
+                            # ~ 'title'     : htmltitle,
+                            # ~ 'body'      : htmlbody
+                            # ~ }
+                values = config[key].copy()
+                values['index'] = index
+                values['title'] = htmltitle
+                values['body'] = htmlbody
+                c['source'] = template.format_map(values)
+        
+        # Add header
+        plain['cells'].insert(0, nf.v4.new_markdown_cell(source=header))
+        
+        # Add navigation to footer
+        triple = {'index' : './00_schedule.ipynb'} # Prevent error
+        triple = nbftools.navigation_triple(args.input_dir, infile)
+        
+        tmp_footer = footer.format_map(triple)
+        
+        if triple['index'] != ('./' + infile):
+            print('INFO: ', triple['index'], infile)
+            plain['cells'].append(nf.v4.new_markdown_cell(source=tmp_footer))
             
-        #~ # Read in the footer file and add navigation
-        #~ if args.footercell is not None:
-            #~ print('Reading from footercell: ' + args.footercell.name)
-            #~ footer = nf.read(args.footercell, nf.NO_CONVERT)
-            
-            #~ triple = {'index' : './00_schedule.ipynb'} # Prevent error
-            #~ if args.sourcedir is not None:
-                #~ triple = navigation_triple(args.sourcedir, args.input.name)
-                #~ for cell in footer['cells'][1:]:
-                    #~ cell['source'] = cell['source'].format_map(triple)
-            
-            #~ inputname = './' + args.input.name.split('/')[-1]
-            #~ if triple['index'] != inputname:
-                #~ plain['cells'].append(*footer['cells'][1:])
-            #~ args.footercell.close()
-            
-        #~ # Write the new notebook to disk
-        #~ outfp = open(args.output, 'w')
-        #~ print('Writing output file: ' + args.output)
-        #~ plain['metadata']['celltoolbar'] = 'None'
-        #~ plain['metadata']['livereveal'] =  {'scroll' : True}
-        #~ nf.write(plain, outfp)
-        #~ args.input.close()
-        #~ outfp.close()
+        # Write the new notebook to disk
+        # ~ out_path = 
+        # ~ outfp = open(out_path, 'w')
+        # ~ print('Writing output file: ' + out_path)
+        plain['metadata']['celltoolbar'] = 'None'
+        plain['metadata']['livereveal'] =  {'scroll' : True}
+        nf.write(plain, os.path.join(args.output_dir, infile))
+        #plain.close()
+        #outfp.close()
 
-        #~ # If needed also write the solutions notebook
-        #~ if solnflag:
-            #~ solfp = open(solnfilename, 'w')
-            #~ print('and also solution outputfile')
-            #~ solnb['metadata']['celltoolbar'] = 'None'
-            #~ #solnb['metadata']['livereveal'] =  {"scroll" : True}
-            #~ nf.write(solnb, solfp)
-            #~ solfp.close()
+        # If needed also write the solutions notebook
+        if solnflag:
+            # ~ solfp = open(solnfilename, 'w')
+            print('and also solution outputfile')
+            solnb['metadata']['celltoolbar'] = 'None'
+            #solnb['metadata']['livereveal'] =  {"scroll" : True}
+            nf.write(solnb, os.path.join(args.output_dir, solnfilename))
+            #solfp.close()
     
 
 def html(args):
