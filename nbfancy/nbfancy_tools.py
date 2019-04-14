@@ -145,33 +145,6 @@ def read_box_colour_config(configdir):
             row_dict['fg-colour'], row_dict['bg-colour'] = colour2fgbg(row_dict['colour'])
             config[key.strip().lower()] = row_dict
     
-    #~ for line in filehandle.readlines():
-        #~ line = line.lstrip()
-        #~ if (line == ''):
-            #~ pass
-        #~ elif (line[0] == '#'):
-            #~ pass
-        #~ else:
-            #~ parts = line.split(',')
-            
-            #~ # Ensure keywords are lowercase
-            #~ keyword = parts[0].strip().lower()
-            
-            #~ # Convert colour to compatible foreground and background
-            #~ fg, bg = colour2fgbg(parts[1].strip())
-            
-            #~ symbol = parts[2].strip()
-            
-            #~ # Keep printing keyword in titles
-            #~ assert parts[3].strip() in true_words + false_words
-            #~ keep = parts[3].strip() in true_words
-            
-            #~ # Hide cell (useful for solutions)
-            #~ assert parts[4].strip() in true_words + false_words
-            #~ hidden = parts[4].strip() in true_words
-            
-            #~ config[keyword] = [fg, bg, symbol, keep, hidden]
-    
     return config
 
 def box_title(line, config):

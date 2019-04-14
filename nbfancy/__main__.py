@@ -163,34 +163,6 @@ def render(args):
                 os.mkdir(rendered_dir)
             except FileExistsError:
                 print('Directory', rendered_dir, 'already exists')
-        
-        #~ # Read in the header file
-        #~ if args.headercell is not None:
-            #~ print('Reading from headercell: ' + args.headercell.name)
-            #~ header = nf.read(args.headercell, nf.NO_CONVERT)
-            #~ plain['cells'].insert(0, *header['cells'][1:])
-            #~ args.headercell.close()
-            
-        #~ # Read in the box config file
-        #~ if args.boxconfig is not None:
-            #~ print('Reading from config file: ' + args.boxconfig.name)
-            #~ config = read_box_colour_config(args.boxconfig)
-            #~ args.boxconfig.close()
-        #~ else:
-            #~ config = {}
-
-        #~ # Read in the box cell template
-        #~ if args.boxcell is not None:
-            #~ print('Reading from box template: ' + args.boxcell.name)
-            #~ template = read_box_template(args.boxcell)
-            #~ args.boxcell.close()
-        #~ else:
-            #~ template = '''
-        #~ <div class="w3-panel w3-leftbar w3-border-{fg-colour} w3-pale-{bg-colour} w3-padding-small">
-            #~ <h3 id="{index}"><i class="fa {symbol}"></i> {title}</h3>
-            #~ {body}
-        #~ </div>
-        #~ '''
     
     # Loop over contents of directory (excluding solution files)
     for infile in contents:
@@ -235,13 +207,6 @@ def render(args):
                     link = './' + solnfilename.split('/')[-1] + '#' + index
                     htmlbody = nbftools.box_body(line[1:], config[key], link)
                 
-                # ~ values = {  'fg-colour' : fg,
-                            # ~ 'bg-colour' : bg,
-                            # ~ 'index'     : index,
-                            # ~ 'symbol'    : symbol,
-                            # ~ 'title'     : htmltitle,
-                            # ~ 'body'      : htmlbody
-                            # ~ }
                 values = config[key].copy()
                 values['index'] = index
                 values['title'] = htmltitle
@@ -262,23 +227,15 @@ def render(args):
             plain['cells'].append(nf.v4.new_markdown_cell(source=tmp_footer))
             
         # Write the new notebook to disk
-        # ~ out_path = 
-        # ~ outfp = open(out_path, 'w')
-        # ~ print('Writing output file: ' + out_path)
         plain['metadata']['celltoolbar'] = 'None'
         plain['metadata']['livereveal'] =  {'scroll' : True}
         nf.write(plain, os.path.join(args.output_dir, infile))
-        #plain.close()
-        #outfp.close()
 
         # If needed also write the solutions notebook
         if solnflag:
-            # ~ solfp = open(solnfilename, 'w')
             print('and also solution outputfile')
             solnb['metadata']['celltoolbar'] = 'None'
-            #solnb['metadata']['livereveal'] =  {"scroll" : True}
             nf.write(solnb, os.path.join(args.output_dir, solnfilename))
-            #solfp.close()
     
 
 def html(args):
