@@ -153,7 +153,8 @@ def render(args):
         header = nbftools.read_header(configdir)
         template = nbftools.read_box_template(configdir)
         config = nbftools.read_box_colour_config(configdir)
-        print(config)
+        from pprint import pprint
+        pprint(config)
         footer = nbftools.read_footer(configdir)
         
         # Create output directory
@@ -182,7 +183,8 @@ def render(args):
         # the cell template and config files
         for c in markdownlist:
             line = c['source'].split('\n')
-            if any(keyword in line[0].lower() for keyword in config.keys()):
+            temp_line = line[0].split(':')
+            if any(keyword == temp_line[0].lower().strip('# ') for keyword in config.keys()):
                 htmltitle, index, key = nbftools.box_title(line[0], config)
                 # Recover paramters from keyword
                 hidden = config[key]['hide']
