@@ -184,7 +184,7 @@ def box_title(line, config):
     
     return htmltitle, index, key
     
-def box_body(body, config, link=None):
+def box_body(body, config, link=None, multicell=[]):
     '''Creates body of the box
     
     '''
@@ -202,9 +202,19 @@ def box_body(body, config, link=None):
     # Apply markup
     htmlbody = nc.filters.markdown2html(body)
     
+    for c in multicell:
+        if c['cell_type'] == 'markdown':
+            htmlbody += nc.filters.markdown2html(c['source'])
+        elif c['cell_type'] == 'code':
+            htmlbody += code2html(c)
+        elif c['cell_type'] == 'raw':
+            htmlbody += raw2html(c)
+        else:
+            pass ## Not sure how we'd end up here
+    
     # Escape symbols
     htmlbody = htmlbody.replace('*', '&ast;')
-    htmlbody = htmlbody.replace('_', '&lowbar;')
+    #htmlbody = htmlbody.replace('_', '&lowbar;')
     
     # Format tables
     htmlbody = htmlbody.replace('<table>', '<table class="w3-table w3-striped w3-hoverable">')
@@ -212,24 +222,65 @@ def box_body(body, config, link=None):
     
     return htmlbody
 
-def code2md():
-    #~ <div class="input">
-        #~ <div class="prompt_container">
-            #~ <div class="prompt input_prompt"><bdi>In</bdi>&nbsp;[4]:</div>
-            #~ <code style="background-color:#F7F7F7;border:1px solid #CFCFCF">nbft.colour2fgbg('red')</code>
-        #~ </div>
-    #~ </div>
-    #~ <div class="output">
-        #~ <div class="output_area">
-            #~ <div class="prompt output_prompt"><bdi>Out[4]:</bdi></div>
-            #~ <div class="output_subarea output_text output_result"><pre>('red', 'pale-red')</pre></div>
-        #~ </div>
-    #~ </div>
-    pass
+def code2html(cell):
+    '''Takes code cell and returns an approximation of the HTML that would
+    be rendered by nbconvert
+    '''
+    assert cell['cell_type'] == 'code'
     
-def output2md():
-    # <img src="data:image/png;base64,NASTYBYTESRING">
-    pass
+    # Define some HTML templates
+    input_template = \
+'''<div class="input">
+    <div class="prompt_container">
+        <div class="prompt input_prompt"><bdi>In</bdi>&nbsp;[{execution_count}]:</div>
+    </div>
+    <code style="background-color:#F7F7F7;border:1px solid #CFCFCF;width:100%">{source}</code>
+</div>'''
+    
+    output_template = \
+'''<div class="output">
+    <div class="output_area">
+        <div class="prompt output_prompt"><bdi>Out[{execution_count}]:</bdi></div>
+        {outputs}
+    </div>
+</div>'''
+    
+    execute = '''<div class="output_subarea output_text output_result" style="width:100%"><pre>{out}</pre></div>'''
+    image = '''<div class="output_subarea output_png output_result" style="width:100%"><img src="data:image/png;base64,{out}"></div>'''
+    stream = '''<div class="output_subarea output_text output_stream output_{name}" style="width:100%"><pre>{text}</pre></div>'''
+    
+    # Input cells
+    html = input_template.format_map(cell)
+    
+    # Output cells
+    outputs_block = ''
+    if len(cell['outputs']) != 0:
+        for output in cell['outputs']:
+            if output['output_type'] == 'execute_result':
+                outputs_block += execute.format(out=output['data']['text/plain'])
+            elif output['output_type'] == 'stream':
+                outputs_block += stream.format_map(output)
+            elif output['output_type'] == 'display_data':
+                outputs_block += image.format(out=output['data']['image/png'])
+            else:
+                pass ## There are probably a lot of cases we aren't covering!
+        html += '\n'
+        html += output_template.format(execution_count=cell['execution_count'], outputs=outputs_block)
+    
+    print(html)
+    return html
+    
+def raw2html(cell):
+    assert cell['cell_type'] == 'raw'
+    raw_template = \
+'''<div class="input">
+    <div class="prompt_container">
+        <div class="prompt input_prompt"></div>
+    </div>
+    <code style="background-color:#F7F7F7;border:1px solid #CFCFCF;width:100%">{source}</code>
+</div>'''
+    html = raw_template.format_map(cell)
+    return html
 
 def directory_contents(directory):
     '''
@@ -252,10 +303,10 @@ def directory_contents(directory):
     contents = [f for f in contents if '-soln' not in f]
     
     # Print directory information
-    print('Directory: ', directory)
-    print('contains notebooks: ')
-    for afile in contents:
-        print('          ', afile)
+    # ~ print('Directory: ', directory)
+    # ~ print('contains notebooks: ')
+    # ~ for afile in contents:
+        # ~ print('          ', afile)
     
     return contents, soln_contents
 
@@ -290,26 +341,7 @@ def navigation_triple(directory, inputfile):
     - next lesson
     and returns these files as a dict
     '''
-    # Store contents of directory as list
-    contents = os.listdir(directory)
-    contents.sort()
-    try:
-        # Remove checkpoints folder from list
-        contents.remove('.ipynb_checkpoints')
-    except ValueError:
-        pass
-    
-    # Remove solution files from index
-    contents = [f for f in contents if '-soln' not in f]
-    
-    # Removes everything else that isn't a notebook ending with .ipynb
-    contents = [f for f in contents if '.ipynb' in f]
-    
-    # Print directory information
-    print('Directory: ', directory)
-    print('contains notebooks: ')
-    for afile in contents:
-        print('          ', afile)
+    contents, _ = directory_contents(directory)
     
     contents.append(contents[0])
     
@@ -321,7 +353,7 @@ def navigation_triple(directory, inputfile):
     index = contents.index(current)
     
     outdir = './'
-    print('Navigation triple is: ', outdir+contents[index-1], outdir+contents[0], outdir+contents[index+1])
+    # ~ print('Navigation triple is: ', outdir+contents[index-1], outdir+contents[0], outdir+contents[index+1])
     triple = {  'previous' : outdir+contents[index-1],
                 'index'    : outdir+contents[0],
                 'next'     : outdir+contents[index+1] }

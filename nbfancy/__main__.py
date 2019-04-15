@@ -153,8 +153,8 @@ def render(args):
         header = nbftools.read_header(configdir)
         template = nbftools.read_box_template(configdir)
         config = nbftools.read_box_colour_config(configdir)
-        from pprint import pprint
-        pprint(config)
+        # ~ from pprint import pprint
+        # ~ pprint(config)
         footer = nbftools.read_footer(configdir)
         
         # Create output directory
@@ -189,6 +189,25 @@ def render(args):
                 # Recover paramters from keyword
                 hidden = config[key]['hide']
                 
+                if key == 'multicell':
+                    start = celllist.index(c) + 1
+                    end = None
+                    for subcell in celllist[start:]:
+                        if subcell['cell_type'] == 'markdown':
+                            lastline = subcell['source'].split('\n')
+                            temp_lastline = lastline[-1].split(':')
+                            if temp_lastline[-1].lower().strip() == key:
+                                end = celllist.index(subcell) + 1
+                                lastline[-1] = ':'.join(temp_lastline[:-1]).strip()
+                                subcell['source'] = '\n'.join(lastline)
+                                break
+                    multicell = celllist[start:end]
+                else:
+                    multicell = []
+                
+                # ~ from pprint import pprint
+                # ~ pprint(multicell)
+                
                 # If hidden move cell to new notebook
                 if hidden:
                     solnflag = True
@@ -204,10 +223,10 @@ def render(args):
                     solnb['cells'][-1] = c.copy()
                     plain['cells'].remove(c)
                     c = solnb['cells'][-1]
-                    htmlbody = nbftools.box_body(line[1:], config[key])
+                    htmlbody = nbftools.box_body(line[1:], config[key], multicell=multicell)
                 else:
                     link = './' + solnfilename.split('/')[-1] + '#' + index
-                    htmlbody = nbftools.box_body(line[1:], config[key], link)
+                    htmlbody = nbftools.box_body(line[1:], config[key], link=link, multicell=multicell)
                 
                 values = config[key].copy()
                 values['index'] = index
@@ -225,7 +244,6 @@ def render(args):
         tmp_footer = footer.format_map(triple)
         
         if triple['index'] != ('./' + infile):
-            print('INFO: ', triple['index'], infile)
             plain['cells'].append(nf.v4.new_markdown_cell(source=tmp_footer))
             
         # Write the new notebook to disk
