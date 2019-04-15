@@ -6,6 +6,7 @@ from IPython.core.magics import script
 
 import tempfile
 import os
+import sys
 import subprocess
 
 @magics_class
@@ -25,9 +26,8 @@ class bash2Magic(Magics):
         # Change to new working directory
         try:
             if args.dir is not None:
-
-                if args.dir[0] == "~":
-                    args.dir = args.dir.replace( "~",os.path.expanduser("~") )
+                if args.dir[0] == '~':
+                    args.dir = args.dir.replace('~', os.path.expanduser('~'))
                 
                 os.chdir(args.dir)
         except Exception as e:
@@ -46,7 +46,12 @@ class bash2Magic(Magics):
             
             # Extract new directory
             err = newscript.shell.user_ns['reterr']
-            newdir = err.split(':pwd:')[-1].strip()
+            parts = err.split(':pwd:')
+            newdir = parts[-1].strip()
+            
+            # Write the stderr as normal, without directory info
+            sys.stderr.write(parts[0])
+            sys.stderr.flush()
             
             # Change into new directory
             try:
