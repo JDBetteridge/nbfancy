@@ -4,6 +4,9 @@ import sys
 import argparse
 import pkg_resources
 
+import nbformat as nf
+import nbconvert as nc
+
 from shutil import move, copy, copytree
 from . import globalconf
 from . import nbfancy_tools as nbftools
@@ -119,9 +122,6 @@ def configure(args):
 def render(args):
     ''' Render plain notebooks as fancy notebooks
     '''
-    import nbformat as nf
-    import nbconvert as nc
-
     from urllib.parse import quote as urlquote
     
     parser = argparse.ArgumentParser()
@@ -158,12 +158,11 @@ def render(args):
         footer = nbftools.read_footer(configdir)
         
         # Create output directory
-        rendered_dir = args.output_dir
         if not os.path.isdir(args.output_dir):
             try:
-                os.mkdir(rendered_dir)
+                os.mkdir(args.output_dir)
             except FileExistsError:
-                print('Directory', rendered_dir, 'already exists')
+                print('Directory', args.output_dir, 'already exists')
     
     # Loop over contents of directory (excluding solution files)
     for infile in contents:
@@ -191,6 +190,7 @@ def render(args):
                 # Recover paramters from keyword
                 hidden = config[key]['hide']
                 
+                # Multicell procedure
                 if key == 'multicell':
                     start = celllist.index(c) + 1
                     end = None
@@ -285,8 +285,42 @@ def html(args):
                         help='Custom configuration directory')
     args, unknown = parser.parse_known_args(sys.argv[2:])
     
+    if not os.path.isdir(args.output_dir):
+        try:
+            os.mkdir(args.output_dir)
+        except FileExistsError:
+            print('Directory', args.output_dir, 'already exists')
+    
     if os.path.isdir(args.input_dir):
-        print(args.input_dir)
+        contents, solution_contents = nbftools.directory_contents(args.input_dir)
+        contents += solution_contents
+    
+    # ~ # CSS dependency magic
+    # ~ $(HTML_DIR)/css.chk:
+        # ~ $(PRINT)
+        # ~ cp -R ./css $(HTML_DIR)/
+        # ~ cp ./custom.css $(HTML_DIR)/custom.css
+        # ~ touch $(HTML_DIR)/css.chk
+
+    # ~ # Copy directories for CI deploy
+    # ~ $(HTML_DIR)/copy.chk:
+        # ~ $(PRINT)
+        # ~ -cp -r $(IMAGE_DIR) $(HTML_DIR)/
+        # ~ -cp -r $(DATA_DIR) $(HTML_DIR)/
+        # ~ -cp -r $(CODE_DIR) $(HTML_DIR)/
+    
+    for infile in contents:
+        # Read input file
+        #notebook = nf.read(os.path.join(args.input_dir, infile), nf.NO_CONVERT)
+        html = nbftools.notebook2HTML(os.path.join(args.input_dir, infile))
+        
+        # Name the output file
+        outfilename = infile.replace('.ipynb', '.html')
+        outpath = os.path.join(args.output_dir, outfilename)
+        
+        print('Writing', outfilename)
+        with open(outpath, 'w') as fh:
+            fh.write(html)
 
 def main():
     ''' Checks for the verb used with nbfancy command

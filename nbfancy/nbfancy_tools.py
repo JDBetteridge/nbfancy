@@ -211,7 +211,7 @@ def box_body(body, config, link=None, multicell=None):
         temphtml = re.sub(r'(\n\s*)+\n', '\n', temphtml)
         # Add boxy thing
         temphtml = temphtml.replace('class="input_area"',
-                        'class="output_area"style="background-color:#F7F7F7;border:1px solid #CFCFCF"')
+                        'class="output_area" style="background-color:#F7F7F7;border:1px solid #CFCFCF"')
         htmlbody += temphtml
         
         #lang = multicell['metadata']['kernelspec']['language']
@@ -299,6 +299,31 @@ def box_body(body, config, link=None, multicell=None):
 # ~ </div>'''
     # ~ html = raw_template.format_map(cell)
     # ~ return html
+
+def notebook2HTML(filename):
+    html_exp = nc.HTMLExporter()
+    html, resources = html_exp.from_filename(filename)
+    
+    # SED rules:
+    # Replace '../folders' in links with './folders'
+    # for folders images, data, code
+    html = html.replace('../images', './images')
+    html = html.replace('../data', './data')
+    html = html.replace('../code', './code')
+    
+	# Replace '.ipynb' in links with '.html'
+    html = html.replace('.ipynb', '.html')
+    
+	# Horrible hack because <code> environment doesn't seem to work with CSS sheet
+    # For plaintext blocks
+    html = html.replace('<pre><code>', '<pre><code style="">')
+    # For inline highlighting
+    html = html.replace('<code>', '<code style="background-color:#F7F7F7;border:1px solid #CFCFCF">')
+    
+	# Another hack since \n is converted to [space] in links
+    html = html.replace('%0A"','%20"')
+    
+    return html
 
 def directory_contents(directory):
     '''
