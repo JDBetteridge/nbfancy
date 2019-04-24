@@ -181,6 +181,8 @@ def render(args):
         
         # For each markdown cell check for keywords and format according to
         # the cell template and config files
+        end = -1
+        
         for c in markdownlist:
             line = c['source'].split('\n')
             temp_line = line[0].split(':')
@@ -202,8 +204,14 @@ def render(args):
                                 subcell['source'] = '\n'.join(lastline)
                                 break
                     multicell = celllist[start:end]
+                    for subcell in multicell:
+                        celllist.remove(subcell)
+                        
+                    multicellnb = nf.v4.new_notebook()
+                    multicellnb['metadata'] = plain['metadata']
+                    multicellnb['cells'] = multicell
                 else:
-                    multicell = []
+                    multicellnb = None
                 
                 # ~ from pprint import pprint
                 # ~ pprint(multicell)
@@ -223,10 +231,10 @@ def render(args):
                     solnb['cells'][-1] = c.copy()
                     plain['cells'].remove(c)
                     c = solnb['cells'][-1]
-                    htmlbody = nbftools.box_body(line[1:], config[key], multicell=multicell)
+                    htmlbody = nbftools.box_body(line[1:], config[key], multicell=multicellnb)
                 else:
                     link = './' + solnfilename.split('/')[-1] + '#' + index
-                    htmlbody = nbftools.box_body(line[1:], config[key], link=link, multicell=multicell)
+                    htmlbody = nbftools.box_body(line[1:], config[key], link=link, multicell=multicellnb)
                 
                 values = config[key].copy()
                 values['index'] = index
