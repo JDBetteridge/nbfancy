@@ -8,6 +8,7 @@ import nbformat as nf
 import nbconvert as nc
 
 from shutil import move, copy, copytree
+from distutils.dir_util import copy_tree # Prefer copy_tree due to overwrite
 from . import globalconf
 from . import nbfancy_tools as nbftools
 
@@ -56,23 +57,13 @@ def init(args):
         copy(source, target)
     
     # Copy template if specified
-    if args.include == 'tutorial':
-        template_path = '/tutorial'  # Do not use os.path.join()
+    if args.include != 'none': # works for template and tutorial
+        template_path = '/' + args.include  # Do not use os.path.join()
         source = pkg_resources.resource_filename(resource_package, template_path)
         target = os.path.join(cwd, 'nbplain')
-        try:
-            copytree(source, target)
-        except FileExistsError:
-            print('Directory', target, 'already exists')
-    elif args.include == 'template':
-        template_path = '/template'  # Do not use os.path.join()
-        source = pkg_resources.resource_filename(resource_package, template_path)
-        target = os.path.join(cwd, 'nbplain')
-        try:
-            copytree(source, target)
-        except FileExistsError:
-            print('Directory', target, 'already exists')
-    else:
+        copy_tree(source, target)
+        
+    else: # works for none
         make_dir = os.path.join(cwd, 'nbplain')
         if not os.path.isdir(make_dir):
             try:
@@ -291,24 +282,34 @@ def html(args):
         except FileExistsError:
             print('Directory', args.output_dir, 'already exists')
     
+    # Collect all input files
     if os.path.isdir(args.input_dir):
         contents, solution_contents = nbftools.directory_contents(args.input_dir)
         contents += solution_contents
     
-    # ~ # CSS dependency magic
-    # ~ $(HTML_DIR)/css.chk:
-        # ~ $(PRINT)
-        # ~ cp -R ./css $(HTML_DIR)/
-        # ~ cp ./custom.css $(HTML_DIR)/custom.css
-        # ~ touch $(HTML_DIR)/css.chk
-
-    # ~ # Copy directories for CI deploy
-    # ~ $(HTML_DIR)/copy.chk:
-        # ~ $(PRINT)
-        # ~ -cp -r $(IMAGE_DIR) $(HTML_DIR)/
-        # ~ -cp -r $(DATA_DIR) $(HTML_DIR)/
-        # ~ -cp -r $(CODE_DIR) $(HTML_DIR)/
+    # Create output directory if not already present
+    cwd = os.getcwd()
+    make_dir = os.path.join(cwd, args.output_dir)
+    if not os.path.isdir(make_dir):
+        try:
+            os.mkdir(make_dir)
+        except FileExistsError:
+            print('Directory', make_dir, 'already exists')
     
+    # Copy all resources to output directory
+    resource_package = 'nbfancy'
+    config_path = '/tools'  # Do not use os.path.join()
+    css_dir = pkg_resources.resource_filename(resource_package, config_path)
+    
+    # Copy our custom CSS directory to output directory
+    copy_tree(css_dir, args.output_dir)
+    
+    # Copy local resource directories
+    dir_list = ['images', 'code', 'data']
+    for idir in dir_list:
+        copy_tree(idir, os.path.join(args.output_dir, idir))
+    
+    # Convert all collected input files
     for infile in contents:
         # Read input file
         #notebook = nf.read(os.path.join(args.input_dir, infile), nf.NO_CONVERT)
