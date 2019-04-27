@@ -120,6 +120,7 @@ def render(args):
     parser.add_argument('input_dir',
                         type=str,
                         default='nbplain',
+                        nargs='?',
                         help='Plain notebook directory')
     parser.add_argument('--output_dir',
                         type=str,
@@ -204,9 +205,6 @@ def render(args):
                 else:
                     multicellnb = None
                 
-                # ~ from pprint import pprint
-                # ~ pprint(multicell)
-                
                 # If hidden move cell to new notebook
                 if hidden:
                     solnflag = True
@@ -265,6 +263,7 @@ def html(args):
     parser.add_argument('input_dir',
                         type=str,
                         default='nbfancy',
+                        nargs='?',
                         help='Fancy notebook directory')
     parser.add_argument('--output_dir',
                         type=str,
@@ -312,7 +311,6 @@ def html(args):
     # Convert all collected input files
     for infile in contents:
         # Read input file
-        #notebook = nf.read(os.path.join(args.input_dir, infile), nf.NO_CONVERT)
         html = nbftools.notebook2HTML(os.path.join(args.input_dir, infile))
         
         # Name the output file

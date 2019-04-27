@@ -213,18 +213,6 @@ def box_body(body, config, link=None, multicell=None):
         temphtml = temphtml.replace('class="input_area"',
                         'class="output_area" style="background-color:#F7F7F7;border:1px solid #CFCFCF"')
         htmlbody += temphtml
-        
-        #lang = multicell['metadata']['kernelspec']['language']
-    
-    # ~ for c in multicell:
-        # ~ if c['cell_type'] == 'markdown':
-            # ~ htmlbody += nc.filters.markdown2html(c['source'])
-        # ~ elif c['cell_type'] == 'code':
-            # ~ htmlbody += code2html(c)
-        # ~ elif c['cell_type'] == 'raw':
-            # ~ htmlbody += raw2html(c)
-        # ~ else:
-            # ~ pass ## Not sure how we'd end up here
     
     # Escape symbols
     htmlbody = htmlbody.replace('*', '&ast;')
@@ -239,66 +227,6 @@ def box_body(body, config, link=None, multicell=None):
         htmlbody = htmlbody[:-1]
     
     return htmlbody
-
-# ~ def code2html(cell):
-    # ~ '''Takes code cell and returns an approximation of the HTML that would
-    # ~ be rendered by nbconvert
-    # ~ '''
-    # ~ assert cell['cell_type'] == 'code'
-    
-    # ~ # Define some HTML templates
-    # ~ input_template = \
-# ~ '''<div class="input">
-    # ~ <div class="prompt_container">
-        # ~ <div class="prompt input_prompt"><bdi>In</bdi>&nbsp;[{execution_count}]:</div>
-    # ~ </div>
-    # ~ <code style="background-color:#F7F7F7;border:1px solid #CFCFCF;width:100%">{source}</code>
-# ~ </div>'''
-    
-    # ~ output_template = \
-# ~ '''<div class="output">
-    # ~ <div class="output_area">
-        # ~ <div class="prompt output_prompt"><bdi>Out[{execution_count}]:</bdi></div>
-        # ~ {outputs}
-    # ~ </div>
-# ~ </div>'''
-    
-    # ~ execute = '''<div class="output_subarea output_text output_result" style="width:100%"><pre>{out}</pre></div>'''
-    # ~ image = '''<div class="output_subarea output_png output_result" style="width:100%"><img src="data:image/png;base64,{out}"></div>'''
-    # ~ stream = '''<div class="output_subarea output_text output_stream output_{name}" style="width:100%"><pre>{text}</pre></div>'''
-    
-    # ~ # Input cells
-    # ~ html = input_template.format_map(cell)
-    
-    # ~ # Output cells
-    # ~ outputs_block = ''
-    # ~ if len(cell['outputs']) != 0:
-        # ~ for output in cell['outputs']:
-            # ~ if output['output_type'] == 'execute_result':
-                # ~ outputs_block += execute.format(out=output['data']['text/plain'])
-            # ~ elif output['output_type'] == 'stream':
-                # ~ outputs_block += stream.format_map(output)
-            # ~ elif output['output_type'] == 'display_data':
-                # ~ outputs_block += image.format(out=output['data']['image/png'])
-            # ~ else:
-                # ~ pass ## There are probably a lot of cases we aren't covering!
-        # ~ html += '\n'
-        # ~ html += output_template.format(execution_count=cell['execution_count'], outputs=outputs_block)
-    
-    # ~ print(html)
-    # ~ return html
-    
-# ~ def raw2html(cell):
-    # ~ assert cell['cell_type'] == 'raw'
-    # ~ raw_template = \
-# ~ '''<div class="input">
-    # ~ <div class="prompt_container">
-        # ~ <div class="prompt input_prompt"></div>
-    # ~ </div>
-    # ~ <code style="background-color:#F7F7F7;border:1px solid #CFCFCF;width:100%">{source}</code>
-# ~ </div>'''
-    # ~ html = raw_template.format_map(cell)
-    # ~ return html
 
 def notebook2HTML(filename):
     html_exp = nc.HTMLExporter()
@@ -345,37 +273,7 @@ def directory_contents(directory):
     soln_contents = [f for f in contents if '-soln' in f]
     contents = [f for f in contents if '-soln' not in f]
     
-    # Print directory information
-    # ~ print('Directory: ', directory)
-    # ~ print('contains notebooks: ')
-    # ~ for afile in contents:
-        # ~ print('          ', afile)
-    
     return contents, soln_contents
-
-def navigation_triple2(contents, filename):
-    '''Given a contents list and filename determines which file is
-    - previous lesson
-    - schedule
-    - next lesson
-    and returns these files as a dict
-    '''
-    # Make list loop, incase this is the last file
-    contents.append(contents[0])
-    
-    current = inputfile.split('/')[-1]
-    # Exceptional case if you're making custom solutions documents
-    if '-soln' in current:
-        current = current.replace('-soln','')
-    
-    index = contents.index(current)
-    
-    outdir = './'
-    print('Navigation triple is: ', outdir+contents[index-1], outdir+contents[0], outdir+contents[index+1])
-    triple = {  'previous' : outdir+contents[index-1],
-                'index'    : outdir+contents[0],
-                'next'     : outdir+contents[index+1] }
-    return triple
 
 def navigation_triple(directory, inputfile):
     '''Given a directory and file determines which file is
@@ -396,7 +294,6 @@ def navigation_triple(directory, inputfile):
     index = contents.index(current)
     
     outdir = './'
-    # ~ print('Navigation triple is: ', outdir+contents[index-1], outdir+contents[0], outdir+contents[index+1])
     triple = {  'previous' : outdir+contents[index-1],
                 'index'    : outdir+contents[0],
                 'next'     : outdir+contents[index+1] }
