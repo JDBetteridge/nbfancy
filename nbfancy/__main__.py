@@ -20,6 +20,11 @@ def init(args):
     '''
     parser = argparse.ArgumentParser()
     parser.prog += ' ' + sys.argv[1]
+    parser.add_argument('dir',
+                        type=str,
+                        default=os.getcwd(),
+                        nargs='?',
+                        help='Directory to initialise')
     parser.add_argument('--extra_conf',
                         action='store_true',
                         help='Initialise additional configuration files')
@@ -30,7 +35,13 @@ def init(args):
     args, unknown = parser.parse_known_args(sys.argv[2:])
     
     # Get cwd
-    cwd = os.getcwd()
+    cwd = args.dir
+    
+    if not os.path.isdir(cwd):
+        try:
+            os.mkdir(cwd)
+        except FileExistsError:
+            print('Directory', cwd, 'already exists')
     
     # Create standard directories
     # Except nbplain, which is created at the end
