@@ -156,8 +156,6 @@ def render(args):
         header = nbftools.read_header(configdir)
         template = nbftools.read_box_template(configdir)
         config = nbftools.read_box_colour_config(configdir)
-        # ~ from pprint import pprint
-        # ~ pprint(config)
         footer = nbftools.read_footer(configdir)
         
         # Create output directory
@@ -188,24 +186,31 @@ def render(args):
         for c in markdownlist:
             line = c['source'].split('\n')
             temp_line = line[0].split(':')
-            if any(keyword == temp_line[0].lower().strip('# ') for keyword in config.keys()):
+            if any(keyword in temp_line[0].lower().strip('# ') for keyword in config.keys()):
                 htmltitle, index, key = nbftools.box_title(line[0], config)
                 # Recover paramters from keyword
                 hidden = config[key]['hide']
                 
                 # Multicell procedure
-                if key == 'multicell':
+                if key + '+' in temp_line[0].lower().strip('# '):
                     start = celllist.index(c) + 1
                     end = None
+                    # Find end cell
                     for subcell in celllist[start:]:
                         if subcell['cell_type'] == 'markdown':
                             lastline = subcell['source'].split('\n')
                             temp_lastline = lastline[-1].split(':')
-                            if temp_lastline[-1].lower().strip() == key:
+                            if key in temp_lastline[-1].lower().strip():
                                 end = celllist.index(subcell) + 1
                                 lastline[-1] = ':'.join(temp_lastline[:-1]).strip()
                                 subcell['source'] = '\n'.join(lastline)
                                 break
+                    else:
+                        # If no end cell found print warning
+                        print('Warning in file', infile, ':')
+                        print('\tNo end tag found for', key + '+', 'environment in cell', start)
+                    
+                    # Move multicells to new notebook for processing
                     multicell = celllist[start:end]
                     for subcell in multicell:
                         celllist.remove(subcell)
@@ -214,6 +219,8 @@ def render(args):
                     multicellnb['metadata'] = plain['metadata']
                     multicellnb['cells'] = multicell
                 else:
+                    # If we aren't in a multicell environment
+                    # we don't need the additional notebook
                     multicellnb = None
                 
                 # If hidden move cell to new notebook
@@ -257,11 +264,12 @@ def render(args):
         # Write the new notebook to disk
         plain['metadata']['celltoolbar'] = 'None'
         plain['metadata']['livereveal'] =  {'scroll' : True}
+        print('Writing output file:', infile)
         nf.write(plain, os.path.join(args.output_dir, infile))
 
         # If needed also write the solutions notebook
         if solnflag:
-            print('and also solution outputfile')
+            print('Writing output file:', solnfilename)
             solnb['metadata']['celltoolbar'] = 'None'
             nf.write(solnb, os.path.join(args.output_dir, solnfilename))
     
@@ -328,7 +336,7 @@ def html(args):
         outfilename = infile.replace('.ipynb', '.html')
         outpath = os.path.join(args.output_dir, outfilename)
         
-        print('Writing', outfilename)
+        print('Writing output file:', outfilename)
         with open(outpath, 'w') as fh:
             fh.write(html)
 
