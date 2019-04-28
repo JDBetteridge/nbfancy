@@ -137,10 +137,10 @@ def rerun(args):
                         type=str,
                         default='nbplain',
                         help='Name of directory for re-evaluated notebooks')
-    parser.add_argument('--clear-only',
+    parser.add_argument('--clear_only',
                         action='store_true',
                         help='Clear the cells, but do not re-evaluate')
-    parser.add_argument('--allow-errors',
+    parser.add_argument('--allow_errors',
                         action='store_true',
                         help='Continue running notebook even if errors occur')
     parser.add_argument('--timeout',
@@ -148,6 +148,48 @@ def rerun(args):
                         default=60,
                         help='Number of seconds to allow each cell to run for')
     args, unknown = parser.parse_known_args(sys.argv[2:])
+    
+    # Get directory contents
+    if os.path.isdir(args.input_dir):
+        contents, solution_contents = nbftools.directory_contents(args.input_dir)
+        contents += solution_contents
+        
+        # Create output directory
+        if not os.path.isdir(args.output_dir):
+            try:
+                os.mkdir(args.output_dir)
+            except FileExistsError:
+                print('Directory', args.output_dir, 'already exists')
+    else:
+        raise FileNotFoundError(2, 'No such directory', args.input_dir)
+    
+    # Create preprocessors 
+    clear_pre = nc.preprocessors.ClearOutputPreprocessor()
+    exec_pre = nc.preprocessors.ExecutePreprocessor(timeout=args.timeout,
+                                                    allow_errors=args.allow_errors)
+    
+    # Loop over contents of directory
+    for infile in contents:
+        # Read in notebook
+        print('Reading input file:', infile)
+        notebook = nf.read(os.path.join(args.input_dir, infile), nf.NO_CONVERT)
+        
+        # Clear or clear and reexecute
+        if args.clear_only:
+            clear_pre.preprocess(notebook)
+        else:
+            try:
+                # Needs to be output dir NOT input dir
+                exec_pre.preprocess(notebook, {'metadata': {'path': args.output_dir}})
+            except nc.preprocessors.CellExecutionError as e:
+                print('Error: While executing the notebook', infile)
+                print(e)
+                print('Warning: notebook will be written, but some cells may not have executed')
+                print('\tIf you want to continue running beyond this error try the --allow-_errors flag')
+            
+        # Write out notebook
+        print('Writing output file:', infile)
+        nf.write(notebook, os.path.join(args.output_dir, infile))
 
 def render(args):
     '''
@@ -193,6 +235,8 @@ def render(args):
                 os.mkdir(args.output_dir)
             except FileExistsError:
                 print('Directory', args.output_dir, 'already exists')
+    else:
+        raise FileNotFoundError(2, 'No such directory', args.input_dir)
     
     # Loop over contents of directory (excluding solution files)
     for infile in contents:
@@ -265,6 +309,8 @@ def html(args):
     if os.path.isdir(args.input_dir):
         contents, solution_contents = nbftools.directory_contents(args.input_dir)
         contents += solution_contents
+    else:
+        raise FileNotFoundError(2, 'No such directory', args.input_dir)
     
     # Create output directory if not already present
     cwd = os.getcwd()
