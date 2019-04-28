@@ -16,9 +16,10 @@ from . import nbfancy_tools as nbftools
 hello = lambda x: print('Hello World!')
 
 def init(args):
-    ''' Initialises a directory
     '''
-    parser = argparse.ArgumentParser()
+    Initialises a directory
+    '''
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.prog += ' ' + sys.argv[1]
     parser.add_argument('dir',
                         type=str,
@@ -84,13 +85,13 @@ def init(args):
                 
     
 def configure(args):
-    '''Sets up global config
+    '''
+    Sets up global config
     '''
     parser = argparse.ArgumentParser()
     parser.prog += ' ' + sys.argv[1]
     parser.add_argument('package',
                         choices=['jupyter_css', 'bash2_magic', 'pdflatex_magic', 'all_magic'],
-                        default = 'template',
                         help='additional package to configure for use with nbfancy')
     parser.add_argument('-y',
                         action='store_true',
@@ -121,12 +122,40 @@ def configure(args):
                 args.package,
                 'is not configured to work on your system')
 
+def rerun(args):
+    '''
+    Re evaulate all cells in notebook
+    '''
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.prog += ' ' + sys.argv[1]
+    parser.add_argument('input_dir',
+                        type=str,
+                        default='nbplain',
+                        nargs='?',
+                        help='Plain notebook directory')
+    parser.add_argument('--output_dir',
+                        type=str,
+                        default='nbplain',
+                        help='Name of directory for re-evaluated notebooks')
+    parser.add_argument('--clear-only',
+                        action='store_true',
+                        help='Clear the cells, but do not re-evaluate')
+    parser.add_argument('--allow-errors',
+                        action='store_true',
+                        help='Continue running notebook even if errors occur')
+    parser.add_argument('--timeout',
+                        type=int,
+                        default=60,
+                        help='Number of seconds to allow each cell to run for')
+    args, unknown = parser.parse_known_args(sys.argv[2:])
+
 def render(args):
-    ''' Render plain notebooks as fancy notebooks
+    '''
+    Render plain notebooks as fancy notebooks
     '''
     from urllib.parse import quote as urlquote
     
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.prog += ' ' + sys.argv[1]
     parser.add_argument('input_dir',
                         type=str,
@@ -136,7 +165,7 @@ def render(args):
     parser.add_argument('--output_dir',
                         type=str,
                         default='nbfancy',
-                        help='Name of fancy notebook to output')
+                        help='Directory to output rendered notebooks to')
     parser.add_argument('-c', '--config',
                         type=str,
                         default='config',
@@ -210,9 +239,10 @@ def render(args):
     
 
 def html(args):
-    ''' Publish fancy (or even plain) notebooks as html
     '''
-    parser = argparse.ArgumentParser()
+    Publish fancy (or even plain) notebooks as html
+    '''
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.prog += ' ' + sys.argv[1]
     parser.add_argument('input_dir',
                         type=str,
@@ -222,11 +252,7 @@ def html(args):
     parser.add_argument('--output_dir',
                         type=str,
                         default='html',
-                        help='Name of html directory to output')
-    parser.add_argument('-c', '--config',
-                        type=str,
-                        default='config',
-                        help='Custom configuration directory')
+                        help='Directory to output html pages to')
     args, unknown = parser.parse_known_args(sys.argv[2:])
     
     if not os.path.isdir(args.output_dir):
@@ -277,12 +303,13 @@ def html(args):
             fh.write(html)
 
 def main():
-    ''' Checks for the verb used with nbfancy command
+    '''
+    Checks for the verb used with nbfancy command
     '''
     # Parse all of the command line options
     parser = argparse.ArgumentParser()
     parser.add_argument('verb',
-                        choices=['init', 'hello', 'configure', 'render', 'html'],
+                        choices=['init', 'hello', 'configure', 'rerun', 'render', 'html'],
                         help='action to perform. Try adding --help to one of these options for more usage information')
     
     # Check that an argument was passed, if not print a more helpful message
