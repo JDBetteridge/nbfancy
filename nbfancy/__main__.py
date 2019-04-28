@@ -167,6 +167,10 @@ def rerun(args):
     clear_pre = nc.preprocessors.ClearOutputPreprocessor()
     exec_pre = nc.preprocessors.ExecutePreprocessor(timeout=args.timeout,
                                                     allow_errors=args.allow_errors)
+    if args.allow_errors:
+        print('Warning: Notebooks are being run with --allow_errors flag')
+        print('\tYou will not be notified of any errors and it is your')
+        print('\tresponsibility to verify the output is correct.')
     
     # Loop over contents of directory
     for infile in contents:
@@ -176,7 +180,7 @@ def rerun(args):
         
         # Clear or clear and reexecute
         if args.clear_only:
-            clear_pre.preprocess(notebook)
+            clear_pre.preprocess(notebook, {'metadata': {'path': args.output_dir}})
         else:
             try:
                 # Needs to be output dir NOT input dir
