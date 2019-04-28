@@ -158,7 +158,7 @@ def box_title(line, config):
     
     # Search for keyword (lowercase) in first line and set that as the key
     for word in keywords:
-        if word in line.lower():
+        if word in line.lower().split(':')[0]:
             key = word
     
     # Recover paramters from keyword
@@ -271,6 +271,12 @@ def notebook2rendered(plain, config, template, solnfilename, header=None, footer
     
     for c in markdownlist:
         line = c['source'].split('\n')
+        
+        # Check for a colon in the first line
+        if line[0].find(':') < 0:
+            continue
+        
+        # Check for a keyword if a colon is found
         temp_line = line[0].split(':')
         if any(keyword in temp_line[0].lower().strip('# ') for keyword in config.keys()):
             htmltitle, index, key = box_title(line[0], config)

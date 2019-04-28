@@ -26,7 +26,7 @@ html pages for lesson material
 and pdfs for distribution as printouts.
 
 The documentation/tutorial is available online in
-[rendered html](https://github.com/JDBetteridge/nbfancy) (coming soon)
+[rendered html](https://jdbetteridge.github.io/nbfancy/00_schedule.html)
 
 ### Contributions to NBfancy
 
