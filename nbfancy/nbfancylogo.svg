@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="44.987213mm"
+   height="21.141884mm"
+   viewBox="0 0 44.987213 21.141884"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.4 5da689c313, 2019-01-14"
+   sodipodi:docname="nbfancylogo.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="7.9195959"
+     inkscape:cx="57.641396"
+     inkscape:cy="36.429684"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1024"
+     inkscape:window-x="0"
+     inkscape:window-y="31"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-11.629252,-9.9917493)">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#4e4e4e;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="10.590556"
+       y="17.770161"
+       id="text3715"><tspan
+         sodipodi:role="line"
+         id="tspan3713"
+         x="10.590556"
+         y="17.770161"
+         style="fill:#4e4e4e;fill-opacity:1;stroke-width:0.26458332">NB</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-variant:normal;font-weight:500;font-stretch:normal;font-size:21.16666603px;line-height:1.25;font-family:Z003;-inkscape-font-specification:'Z003, Medium Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#f37726;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="23.252451"
+       y="24.385082"
+       id="text3719"><tspan
+         sodipodi:role="line"
+         id="tspan3729"
+         x="23.252451"
+         y="24.385082">f</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-variant:normal;font-weight:500;font-stretch:normal;font-size:15.875px;line-height:1.25;font-family:Z003;-inkscape-font-specification:'Z003, Medium Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#4e4e4e;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="29.666916"
+       y="23.650091"
+       id="text3723"><tspan
+         sodipodi:role="line"
+         id="tspan4538"
+         x="29.666916"
+         y="23.650091">ancy</tspan></text>
+    <circle
+       style="fill:#989898;fill-opacity:1;stroke-width:0.26458332"
+       id="path4542"
+       cx="16.837978"
+       cy="22.046474"
+       r="2.5390604" />
+    <circle
+       style="fill:#767676;fill-opacity:1;stroke-width:0.19272119"
+       id="path4544"
+       cx="30.635769"
+       cy="29.162519"
+       r="1.9711128" />
+    <circle
+       style="fill:#707070;fill-opacity:1;stroke-width:0.26458332"
+       id="path4546"
+       cx="39.154984"
+       cy="13.092944"
+       r="1.4699824" />
+  </g>
+</svg>

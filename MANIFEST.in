@@ -1,0 +1,13 @@
+# REQUIRED CSS FILES
+include nbfancy/tools/custom.css
+graft nbfancy/tools/css
+
+# REQUIRED TEMPLATE FILES
+recursive-include nbfancy/config *.ipynb *.cfg
+recursive-include nbfancy/template *.ipynb
+recursive-include nbfancy/tutorial *.ipynb
+
+# REMOVE CACHE FILES
+# first isn't working???
+global-exclude .ipynb_checkpoints
+global-exclude __pycache__
