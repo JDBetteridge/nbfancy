@@ -185,7 +185,7 @@ def box_title(line, config):
     
     return htmltitle, index, key
     
-def box_body(body, config, link=None, multicell=None):
+def box_body(body, config, template, solnfilename, link=None, multicell=None):
     '''Creates body of the box
     
     '''
@@ -204,9 +204,14 @@ def box_body(body, config, link=None, multicell=None):
     htmlbody = nc.filters.markdown2html(body)
     
     if multicell is not None:
+        # Bit of recursion
+        #print('Warning nested cell environments')
+        rendered, soln = notebook2rendered(multicell, config, template, solnfilename)
+        
+        # Export to html to include in cell
         html_exp = nc.HTMLExporter()
         html_exp.template_file = 'basic'
-        temphtml, resources = html_exp.from_notebook_node(multicell)
+        temphtml, resources = html_exp.from_notebook_node(rendered)
         # Remove multiple newlines
         temphtml = re.sub(r'(\n\s*)+\n', '\n', temphtml)
         # Add boxy thing
@@ -237,7 +242,94 @@ def box_body(body, config, link=None, multicell=None):
     
     return htmlbody
 
+def notebook2rendered(plain, config, template, solnfilename, header=None, footer=None):
+    '''
+    Converts notebook JSON to rendered notebook JSON for output
+    '''
+    # List all the markdown cells
+    celllist = plain['cells']
+    markdownlist = [c for c in celllist if c['cell_type']=='markdown']
+    solnb = None
+    
+    # For each markdown cell check for keywords and format according to
+    # the cell template and config files
+    end = -1
+    
+    for c in markdownlist:
+        line = c['source'].split('\n')
+        temp_line = line[0].split(':')
+        if any(keyword in temp_line[0].lower().strip('# ') for keyword in config.keys()):
+            htmltitle, index, key = box_title(line[0], config)
+            # Recover paramters from keyword
+            hidden = config[key]['hide']
+            
+            # Multicell procedure
+            if key + '+' in temp_line[0].lower().strip('# '):
+                start = celllist.index(c) + 1
+                end = None
+                # Find end cell
+                for subcell in celllist[start:]:
+                    if subcell['cell_type'] == 'markdown':
+                        lastline = subcell['source'].split('\n')
+                        temp_lastline = lastline[-1].split(':')
+                        if key in temp_lastline[-1].lower().strip():
+                            end = celllist.index(subcell) + 1
+                            lastline[-1] = ':'.join(temp_lastline[:-1]).strip()
+                            subcell['source'] = '\n'.join(lastline)
+                            break
+                else:
+                    # If no end cell found print warning
+                    try:
+                        print('Warning in file', infile, ':')
+                        print('\tNo end tag found for', key + '+', 'environment in cell', start)
+                    except NameError:
+                        print('Warning in temporary file:')
+                        print('\tNo end tag found for', key + '+', 'environment in cell', start)
+                        print('\tCheck you haven\'t nested environments')
+                
+                # Move multicells to new notebook for processing
+                multicell = celllist[start:end]
+                for subcell in multicell:
+                    celllist.remove(subcell)
+                    
+                multicellnb = nf.v4.new_notebook()
+                multicellnb['metadata'] = plain['metadata']
+                multicellnb['cells'] = multicell
+            else:
+                # If we aren't in a multicell environment
+                # we don't need the additional notebook
+                multicellnb = None
+            
+            # If hidden move cell to new notebook
+            if hidden:
+                # Make a new notebook if it doesn't exist already
+                if solnb is None:
+                    solnb = nf.v4.new_notebook()
+                    solnb['metadata'] = plain['metadata']
+                    solnb['cells'].append(nf.v4.new_markdown_cell(source='# Solutions'))
+                
+                solnb['cells'].append(nf.v4.new_markdown_cell(source=''))
+                # REDEFINE c
+                solnb['cells'][-1] = c.copy()
+                plain['cells'].remove(c)
+                c = solnb['cells'][-1]
+                htmlbody = box_body(line[1:], config, template, solnfilename, multicell=multicellnb)
+            else:
+                link = './' + solnfilename.split('/')[-1] + '#' + index
+                htmlbody = box_body(line[1:], config, template, solnfilename, link=link, multicell=multicellnb)
+            
+            values = config[key].copy()
+            values['index'] = index
+            values['title'] = htmltitle
+            values['body'] = htmlbody
+            c['source'] = template.format_map(values)
+    
+    return plain, solnb
+
 def notebook2HTML(filename):
+    '''
+    Converts notebook file to a html string
+    '''
     html_exp = nc.HTMLExporter()
     html, resources = html_exp.from_filename(filename)
     

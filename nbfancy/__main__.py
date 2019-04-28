@@ -167,111 +167,46 @@ def render(args):
     
     # Loop over contents of directory (excluding solution files)
     for infile in contents:
-        # Name the solution file
-        solnfilename = infile.replace('.ipynb', '-soln.ipynb')
-        solnflag = False
-        solnb = None
-
-        print('Reading input file: ' + infile)
-
-        # Open notebook and list all the markdown cells
+        # Read input file
+        print('Reading input file:', infile)
         plain = nf.read(os.path.join(args.input_dir, infile), nf.NO_CONVERT)
-        celllist = plain['cells']
-        markdownlist = [c for c in celllist if c['cell_type']=='markdown']
+        solnfilename = infile.replace('.ipynb', '-soln.ipynb')
         
-        # For each markdown cell check for keywords and format according to
-        # the cell template and config files
-        end = -1
-        
-        for c in markdownlist:
-            line = c['source'].split('\n')
-            temp_line = line[0].split(':')
-            if any(keyword in temp_line[0].lower().strip('# ') for keyword in config.keys()):
-                htmltitle, index, key = nbftools.box_title(line[0], config)
-                # Recover paramters from keyword
-                hidden = config[key]['hide']
-                
-                # Multicell procedure
-                if key + '+' in temp_line[0].lower().strip('# '):
-                    start = celllist.index(c) + 1
-                    end = None
-                    # Find end cell
-                    for subcell in celllist[start:]:
-                        if subcell['cell_type'] == 'markdown':
-                            lastline = subcell['source'].split('\n')
-                            temp_lastline = lastline[-1].split(':')
-                            if key in temp_lastline[-1].lower().strip():
-                                end = celllist.index(subcell) + 1
-                                lastline[-1] = ':'.join(temp_lastline[:-1]).strip()
-                                subcell['source'] = '\n'.join(lastline)
-                                break
-                    else:
-                        # If no end cell found print warning
-                        print('Warning in file', infile, ':')
-                        print('\tNo end tag found for', key + '+', 'environment in cell', start)
-                    
-                    # Move multicells to new notebook for processing
-                    multicell = celllist[start:end]
-                    for subcell in multicell:
-                        celllist.remove(subcell)
-                        
-                    multicellnb = nf.v4.new_notebook()
-                    multicellnb['metadata'] = plain['metadata']
-                    multicellnb['cells'] = multicell
-                else:
-                    # If we aren't in a multicell environment
-                    # we don't need the additional notebook
-                    multicellnb = None
-                
-                # If hidden move cell to new notebook
-                if hidden:
-                    solnflag = True
-                    
-                    # Make a new notebook if it doesn't exist already
-                    if solnb is None:
-                        solnb = nf.v4.new_notebook()
-                        solnb['metadata'] = plain['metadata']
-                        solnb['cells'].append(nf.v4.new_markdown_cell(source='# Solutions'))
-                    
-                    solnb['cells'].append(nf.v4.new_markdown_cell(source=''))
-                    # REDEFINE c
-                    solnb['cells'][-1] = c.copy()
-                    plain['cells'].remove(c)
-                    c = solnb['cells'][-1]
-                    htmlbody = nbftools.box_body(line[1:], config[key], multicell=multicellnb)
-                else:
-                    link = './' + solnfilename.split('/')[-1] + '#' + index
-                    htmlbody = nbftools.box_body(line[1:], config[key], link=link, multicell=multicellnb)
-                
-                values = config[key].copy()
-                values['index'] = index
-                values['title'] = htmltitle
-                values['body'] = htmlbody
-                c['source'] = template.format_map(values)
+        # Render
+        rendered, soln = nbftools.notebook2rendered(plain,
+                                                    config,
+                                                    template,
+                                                    solnfilename,
+                                                    header=header,
+                                                    footer=footer)
         
         # Add header
-        plain['cells'].insert(0, nf.v4.new_markdown_cell(source=header))
+        rendered['cells'].insert(0, nf.v4.new_markdown_cell(source=header))
         
         # Add navigation to footer
         triple = {'index' : './00_schedule.ipynb'} # Prevent error
         triple = nbftools.navigation_triple(args.input_dir, infile)
         
         tmp_footer = footer.format_map(triple)
-        
         if triple['index'] != ('./' + infile):
-            plain['cells'].append(nf.v4.new_markdown_cell(source=tmp_footer))
+            rendered['cells'].append(nf.v4.new_markdown_cell(source=tmp_footer))
             
-        # Write the new notebook to disk
-        plain['metadata']['celltoolbar'] = 'None'
-        plain['metadata']['livereveal'] =  {'scroll' : True}
+        # Remove cell toolbars and add scroll to slides
+        rendered['metadata']['celltoolbar'] = 'None'
+        rendered['metadata']['livereveal'] =  {'scroll' : True}
+        
+        # Write the new notebook
         print('Writing output file:', infile)
         nf.write(plain, os.path.join(args.output_dir, infile))
 
         # If needed also write the solutions notebook
-        if solnflag:
+        if soln is not None:
+            # Add header
+            soln['cells'].insert(0, nf.v4.new_markdown_cell(source=header))
+            soln['metadata']['celltoolbar'] = 'None'
+            
             print('Writing output file:', solnfilename)
-            solnb['metadata']['celltoolbar'] = 'None'
-            nf.write(solnb, os.path.join(args.output_dir, solnfilename))
+            nf.write(soln, os.path.join(args.output_dir, solnfilename))
     
 
 def html(args):
@@ -330,6 +265,7 @@ def html(args):
     # Convert all collected input files
     for infile in contents:
         # Read input file
+        print('Reading input file:', infile)
         html = nbftools.notebook2HTML(os.path.join(args.input_dir, infile))
         
         # Name the output file
