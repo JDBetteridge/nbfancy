@@ -15,7 +15,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='nbfancy',
-    version='0.1dev1',
+    version='0.1dev2',
     author='Jack Betteridge',
     packages=setuptools.find_packages(),
     package_data = {

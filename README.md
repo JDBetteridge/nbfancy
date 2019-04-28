@@ -1,4 +1,4 @@
-# <img alt="NBfancy" src="https://raw.githubusercontent.com/JDBetteridge/nbfancy/python_package/nbfancy/nbfancylogo.png" height="80">
+# <img alt="NBfancy" src="https://raw.githubusercontent.com/JDBetteridge/nbfancy/master/nbfancy/nbfancylogo.png" height="80">
 
 (C) 2019 Jack Betteridge (j.d.betteridge@bath.ac.uk) and James Grant (r.j.grant@bath.ac.uk)
 
