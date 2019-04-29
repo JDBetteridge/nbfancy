@@ -135,7 +135,7 @@ def rerun(args):
                         help='Plain notebook directory')
     parser.add_argument('--output_dir',
                         type=str,
-                        default='nbplain',
+                        default=None,
                         help='Name of directory for re-evaluated notebooks')
     parser.add_argument('--clear_only',
                         action='store_true',
@@ -148,6 +148,9 @@ def rerun(args):
                         default=60,
                         help='Number of seconds to allow each cell to run for')
     args, unknown = parser.parse_known_args(sys.argv[2:])
+    # Make output directory same as input unless otherwise specified
+    if args.output_dir is None:
+        args.output_dir = args.input_dir
     
     # Get directory contents
     if os.path.isdir(args.input_dir):
