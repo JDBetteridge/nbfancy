@@ -12,8 +12,8 @@ install:
   - pip install -e .
 
 script:
-  - nbfancy configure jupyter_css
-  - nbfancy configure all_magic
+  - nbfancy configure -y jupyter_css
+  - nbfancy configure -y all_magic
   - nbfancy init gh-pages --include tutorial
   - cd gh-pages
   - nbfancy rerun --allow_errors
