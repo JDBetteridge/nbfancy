@@ -95,7 +95,7 @@ def jupyter():
     else:
         # Otherwise check if the custom folder is there
         if not os.path.isdir(custom_dir):
-            os.mkdirs(custom_dir)
+            os.makedirs(custom_dir)
     
     resource_package = 'nbfancy'
     config_path = '/tools'  # Do not use os.path.join()
