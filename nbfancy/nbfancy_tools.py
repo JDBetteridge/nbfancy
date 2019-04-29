@@ -372,6 +372,10 @@ def notebook2HTML(filename):
 	# Another hack since \n is converted to [space] in links
     html = html.replace('%0A"','%20"')
     
+    # Add the favicon
+    html = html.replace('<head><meta charset="utf-8" />',
+        '<head><meta charset="utf-8" />\n<link rel="icon" type="image/png" href="css/favicon.png"/>')
+    
     return html
 
 def directory_contents(directory):
