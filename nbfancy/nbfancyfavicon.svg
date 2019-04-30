@@ -11,9 +11,9 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="21.217161mm"
-   height="21.203114mm"
-   viewBox="0 0 21.217161 21.203114"
+   width="21.213913mm"
+   height="21.26116mm"
+   viewBox="0 0 21.213913 21.26116"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.4 5da689c313, 2019-01-14"
@@ -82,9 +82,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="5.6"
-     inkscape:cx="55.632371"
-     inkscape:cy="29.114545"
+     inkscape:zoom="11.2"
+     inkscape:cx="50.474706"
+     inkscape:cy="14.660418"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -97,8 +97,8 @@
     <inkscape:grid
        type="xygrid"
        id="grid834"
-       originx="-0.72745707"
-       originy="-0.56696529" />
+       originx="-0.73070489"
+       originy="-0.47117839" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -116,18 +116,18 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-11.648004,-10.070964)">
+     transform="translate(-11.651252,-10.108705)">
     <rect
-       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26817498;stroke-opacity:1"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.2690734;stroke-opacity:1"
        id="rect3106"
        width="21.213913"
-       height="21.119419"
+       height="21.26116"
        x="11.651252"
        y="10.108705"
        inkscape:export-filename="/home/jack/Documents/James_Grant/nbfancy/nbfancy/tools/css/favicon.png"
        inkscape:export-xdpi="153.33598"
        inkscape:export-ydpi="153.33598"
-       ry="2.5985863" />
+       ry="2.6160266" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:11.28888893px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#4e4e4e;fill-opacity:1;stroke:none;stroke-width:0.26458332"
