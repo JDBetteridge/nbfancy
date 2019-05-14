@@ -5,7 +5,8 @@
 This repository contains NBfancy,
 a tool for adding decoration and extended features to Jupyter notebooks.
 The code was developed by Jack Betteridge and James Grant
-for the development of programming training material.
+for the development of programming training material:
+[arc-bath](https://github.com/arc-bath) and [arc-lessons](https://github.com/arc-lessons).
 
 ### Documentation
 
@@ -27,6 +28,8 @@ and pdfs for distribution as printouts (coming in a future release).
 
 The documentation/tutorial is available online in
 [rendered html](https://jdbetteridge.github.io/nbfancy/00_schedule.html)
+
+The library has recently undergone a signficant refactoring so please raise an issue if you encounter any trouble using nbfancy or incosistencies in the documentation.
 
 ### Contributions to NBfancy
 
