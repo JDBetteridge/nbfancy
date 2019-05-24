@@ -361,7 +361,8 @@ def notebook2HTML(filename):
     html = html.replace('../code', './code')
     
 	# Replace '.ipynb' in links with '.html'
-    html = html.replace('.ipynb', '.html')
+    # the '"' ensures this (hopefully) only happens in links
+    html = html.replace('.ipynb"', '.html"')
     
 	# Horrible hack because <code> environment doesn't seem to work with CSS sheet
     # For plaintext blocks
