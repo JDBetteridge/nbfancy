@@ -360,11 +360,12 @@ def notebook2HTML(filename):
     html = html.replace('../data', './data')
     html = html.replace('../code', './code')
     
-	# Replace '.ipynb' in links with '.html'
+	  # Replace '.ipynb' in links with '.html'
     # the '"' ensures this (hopefully) only happens in links
     html = html.replace('.ipynb"', '.html"')
+    html = html.replace('.ipynb#', '.html#')
     
-	# Horrible hack because <code> environment doesn't seem to work with CSS sheet
+	  # Horrible hack because <code> environment doesn't seem to work with CSS sheet
     # For plaintext blocks
     html = html.replace('<pre><code>', '<pre><code style="">')
     # For inline highlighting
