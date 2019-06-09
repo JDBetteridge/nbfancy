@@ -46,8 +46,7 @@ def read_header(configdir):
     # Open file and extract text in second cell
     with try_config(configdir, 'header.ipynb') as fh:
         notebook = nf.read(fh, nf.NO_CONVERT)
-        box = notebook['cells'][1]
-        template = box['source']
+        template = notebook['cells'][1]
     
     return template
     
@@ -58,8 +57,7 @@ def read_footer(configdir):
     # Open file and extract text in second cell
     with try_config(configdir, 'footer.ipynb') as fh:
         notebook = nf.read(fh, nf.NO_CONVERT)
-        box = notebook['cells'][1]
-        template = box['source']
+        template = notebook['cells'][1]
     
     return template
 
@@ -256,7 +254,7 @@ def box_body(body, config, template, solnfilename, link=None, multicell=None):
     
     return htmlbody
 
-def notebook2rendered(plain, config, template, solnfilename, header=None, footer=None):
+def notebook2rendered(plain, config, template, solnfilename):
     '''
     Converts notebook JSON to rendered notebook JSON for output
     '''
@@ -360,12 +358,12 @@ def notebook2HTML(filename):
     html = html.replace('../data', './data')
     html = html.replace('../code', './code')
     
-	  # Replace '.ipynb' in links with '.html'
+    # Replace '.ipynb' in links with '.html'
     # the '"' ensures this (hopefully) only happens in links
     html = html.replace('.ipynb"', '.html"')
     html = html.replace('.ipynb#', '.html#')
     
-	  # Horrible hack because <code> environment doesn't seem to work with CSS sheet
+    # Horrible hack because <code> environment doesn't seem to work with CSS sheet
     # For plaintext blocks
     html = html.replace('<pre><code>', '<pre><code style="">')
     # For inline highlighting
@@ -379,6 +377,36 @@ def notebook2HTML(filename):
         '<head><meta charset="utf-8" />\n<link rel="icon" type="image/png" href="css/favicon.png"/>')
     
     return html
+
+def notebook2slides(filename):
+    '''
+    Converts notebook file to a slide show
+    '''
+    slides_exp = nc.SlidesExporter()
+    slides, resources = slides_exp.from_filename(filename)
+    
+    # Custom CSS is in the directory above slides
+    slides = slides.replace('href="custom.css"', 'href="../custom.css"')
+    
+    # Replace '.ipynb' in links with '.html'
+    # the '"' ensures this (hopefully) only happens in links
+    slides = slides.replace('.ipynb"', '.html"')
+    slides = slides.replace('.ipynb#', '.html#')
+    
+    # Horrible hack because <code> environment doesn't seem to work with CSS sheet
+    # For plaintext blocks
+    slides = slides.replace('<pre><code>', '<pre><code style="">')
+    # For inline highlighting
+    slides = slides.replace('<code>', '<code style="background-color:#F7F7F7;border:1px solid #CFCFCF">')
+    
+	# Another hack since \n is converted to [space] in links
+    slides = slides.replace('%0A"','%20"')
+    
+    # Add the favicon
+    slides = slides.replace('<head><meta charset="utf-8" />',
+        '<head><meta charset="utf-8" />\n<link rel="icon" type="image/png" href="css/favicon.png"/>')
+    
+    return slides
 
 def directory_contents(directory):
     '''

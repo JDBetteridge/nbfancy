@@ -263,20 +263,19 @@ def render(args):
         rendered, soln = nbftools.notebook2rendered(plain,
                                                     config,
                                                     template,
-                                                    solnfilename,
-                                                    header=header,
-                                                    footer=footer)
+                                                    solnfilename)
         
         # Add header
-        rendered['cells'].insert(0, nf.v4.new_markdown_cell(source=header))
+        rendered['cells'].insert(0, header)
         
         # Add navigation to footer
         triple = {'index' : './00_schedule.ipynb'} # Prevent error
         triple = nbftools.navigation_triple(args.input_dir, infile)
         
-        tmp_footer = footer.format_map(triple)
+        tmp_footer = footer.copy()
+        tmp_footer['source'] = footer['source'].format_map(triple)
         if triple['index'] != ('./' + infile):
-            rendered['cells'].append(nf.v4.new_markdown_cell(source=tmp_footer))
+            rendered['cells'].append(tmp_footer)
             
         # Remove cell toolbars and add scroll to slides
         rendered['metadata']['celltoolbar'] = 'None'
@@ -289,7 +288,7 @@ def render(args):
         # If needed also write the solutions notebook
         if soln is not None:
             # Add header
-            soln['cells'].insert(0, nf.v4.new_markdown_cell(source=header))
+            soln['cells'].insert(0, header)
             soln['metadata']['celltoolbar'] = 'None'
             
             print('Writing output file:', solnfilename)
@@ -311,6 +310,9 @@ def html(args):
                         type=str,
                         default='html',
                         help='Directory to output html pages to')
+    parser.add_argument('--include_slides',
+                        action='store_true',
+                        help='Includes html slides in slides directory inside output_dir')
     args, unknown = parser.parse_known_args(sys.argv[2:])
     
     if not os.path.isdir(args.output_dir):
@@ -351,19 +353,38 @@ def html(args):
         except:
             print(idir, 'directory not found, not copying')
     
-    # Convert all collected input files
+    # Make a slides directory
+    slides_dir = os.path.join(args.output_dir, 'slides')
+    if args.include_slides and not os.path.isdir(slides_dir):
+        try:
+            os.mkdir(slides_dir)
+        except FileExistsError:
+            print('Directory', slides_dir, 'already exists')
+    
+    # Convert all collected input files (makes slides too)
     for infile in contents:
         # Read input file
         print('Reading input file:', infile)
         html = nbftools.notebook2HTML(os.path.join(args.input_dir, infile))
-        
+        if args.include_slides:
+            slides = nbftools.notebook2slides(os.path.join(args.input_dir, infile))
+            
         # Name the output file
         outfilename = infile.replace('.ipynb', '.html')
         outpath = os.path.join(args.output_dir, outfilename)
         
+        # Write webpage
         print('Writing output file:', outfilename)
         with open(outpath, 'w') as fh:
             fh.write(html)
+        
+        # Write slideshow
+        if args.include_slides:
+            slides_path = os.path.join(slides_dir, outfilename)
+            print('Writing slides output file:', outfilename)
+            with open(slides_path, 'w') as sfh:
+                sfh.write(slides)
+        
 
 def main():
     '''
