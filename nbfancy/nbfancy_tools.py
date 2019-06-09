@@ -251,7 +251,7 @@ def box_body(body, config, template, solnfilename, link=None, multicell=None):
     htmlbody = htmlbody.replace('<thead>', '<thead class="w3-black">')
     
     # Be sure to remove final newline
-    if htmlbody[-1] == '\n':
+    if len(htmlbody) > 0 and htmlbody[-1] == '\n':
         htmlbody = htmlbody[:-1]
     
     return htmlbody
