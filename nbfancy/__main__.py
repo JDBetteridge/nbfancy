@@ -70,7 +70,7 @@ def init(args):
     
     # Add a .gitignore to exclude nbfancy and html directories
     # as well as checkpoints
-    ignore_path = pkg_resources.resource_filename(resource_package, '')
+    ignore_path = pkg_resources.resource_filename(resource_package, '/tools')
     ignore_source = os.path.join(ignore_path, 'example_gitignore')
     ignore_target = os.path.join(cwd, '.gitignore')
     copy(ignore_source, ignore_target)
@@ -313,6 +313,10 @@ def html(args):
     parser.add_argument('--include_slides',
                         action='store_true',
                         help='Includes html slides in slides directory inside output_dir')
+    parser.add_argument('--redirect',
+                        type=str,
+                        default='00_schedule.html',
+                        help='page to automatically redirect to')
     args, unknown = parser.parse_known_args(sys.argv[2:])
     
     if not os.path.isdir(args.output_dir):
@@ -339,7 +343,7 @@ def html(args):
     
     # Copy all resources to output directory
     resource_package = 'nbfancy'
-    config_path = '/tools'  # Do not use os.path.join()
+    config_path = '/tools/css'  # Do not use os.path.join()
     css_dir = pkg_resources.resource_filename(resource_package, config_path)
     
     # Copy our custom CSS directory to output directory
@@ -382,9 +386,20 @@ def html(args):
         if args.include_slides:
             slides_path = os.path.join(slides_dir, outfilename)
             print('Writing slides output file:', outfilename)
-            with open(slides_path, 'w') as sfh:
-                sfh.write(slides)
-        
+            with open(slides_path, 'w') as fh:
+                fh.write(slides)
+    
+    # Add a redirect
+    redirect_path = '/tools'  # Do not use os.path.join()
+    redirect_dir = pkg_resources.resource_filename(resource_package, redirect_path)
+    print('Reading redirect template')
+    with open(os.path.join(redirect_dir, 'redirect.html'), 'r') as fh:
+        redirect_template = fh.read()
+    
+    redirect_html = redirect_template.format_map({'page' : args.redirect})
+    print('Reading redirect file')
+    with open(os.path.join(args.output_dir, 'index.html'), 'w') as fh:
+        fh.write(redirect_html)
 
 def main():
     '''

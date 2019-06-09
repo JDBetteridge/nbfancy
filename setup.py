@@ -11,9 +11,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     package_data = {
         'nbfancy/config'    : ['*.ipynb', '*.cfg'],
-        'nbfancy/tools'     : ['custom.css'],
-        'nbfancy/tools/css' : ['*'],
-        'nbfancy'           : ['example_gitignore']
+        'nbfancy/tools'     : ['*'],
     },
     include_package_data=True,
     install_requires = ['ipython>=6', 'jupyter',],

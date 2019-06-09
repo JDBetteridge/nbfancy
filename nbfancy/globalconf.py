@@ -98,7 +98,7 @@ def jupyter():
             os.makedirs(custom_dir)
     
     resource_package = 'nbfancy'
-    config_path = '/tools'  # Do not use os.path.join()
+    config_path = '/tools/css'  # Do not use os.path.join()
     css_dir = pkg_resources.resource_filename(resource_package, config_path)
     
     # Copy our custom CSS file to the path
