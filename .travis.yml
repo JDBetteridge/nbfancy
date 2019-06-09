@@ -17,7 +17,7 @@ script:
   - cd gh-pages
   - nbfancy rerun --allow_errors
   - nbfancy render
-  - nbfancy html
+  - nbfancy html --include_slides
 
 deploy:
   provider: pages
