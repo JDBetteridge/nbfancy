@@ -383,6 +383,7 @@ def notebook2slides(filename):
     Converts notebook file to a slide show
     '''
     slides_exp = nc.SlidesExporter()
+    slides_exp.reveal_scroll = True # Doesn't work?
     slides, resources = slides_exp.from_filename(filename)
     
     # Custom CSS is in the directory above slides
