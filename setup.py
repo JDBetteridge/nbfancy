@@ -1,17 +1,8 @@
-#import sys
-#from nbfancy import configure
 import setuptools
 
 # Long description comes from README file
 with open('README.md', 'r') as fh:
     long_description = fh.read()
-
-# When installing need to change setting in IPython and Jupyter
-# Since this affects users global config, this will now be handled
-# post install
-#if 'install' in sys.argv:
-#    configure.ipython()
-#    configure.jupyter()
 
 setuptools.setup(
     name='nbfancy',
@@ -21,11 +12,11 @@ setuptools.setup(
     package_data = {
         'nbfancy/config'    : ['*.ipynb', '*.cfg'],
         'nbfancy/tools'     : ['custom.css'],
-        'nbfancy/tools/css' : ['*']
+        'nbfancy/tools/css' : ['*'],
+        'nbfancy'           : ['example_gitignore']
     },
     include_package_data=True,
-    py_modules=['configure'],
-    install_requires = ['ipython>=6','jupyter',],
+    install_requires = ['ipython>=6', 'jupyter',],
     entry_points={
         'console_scripts': [
             'nbfancy=nbfancy.__main__:main',

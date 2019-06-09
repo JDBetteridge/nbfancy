@@ -68,6 +68,13 @@ def init(args):
         target = os.path.join(config_dir, ifile)
         copy(source, target)
     
+    # Add a .gitignore to exclude nbfancy and html directories
+    # as well as checkpoints
+    ignore_path = pkg_resources.resource_filename(resource_package, '')
+    ignore_source = os.path.join(ignore_path, 'example_gitignore')
+    ignore_target = os.path.join(cwd, '.gitignore')
+    copy(ignore_source, ignore_target)
+    
     # Copy template if specified
     if args.include != 'none': # works for template and tutorial
         template_path = '/' + args.include  # Do not use os.path.join()
@@ -192,7 +199,7 @@ def rerun(args):
                 print('Error: While executing the notebook', infile)
                 print(e)
                 print('Warning: notebook will be written, but some cells may not have executed')
-                print('\tIf you want to continue running beyond this error try the --allow-_errors flag')
+                print('\tIf you want to continue running beyond this error try the --allow_errors flag')
             
         # Write out notebook
         print('Writing output file:', infile)
@@ -339,7 +346,10 @@ def html(args):
     # Copy local resource directories
     dir_list = ['images', 'code', 'data']
     for idir in dir_list:
-        copy_tree(idir, os.path.join(args.output_dir, idir))
+        try:
+            copy_tree(idir, os.path.join(args.output_dir, idir))
+        except:
+            print(idir, 'directory not found, not copying')
     
     # Convert all collected input files
     for infile in contents:
