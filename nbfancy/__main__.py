@@ -199,7 +199,8 @@ def rerun(args):
         else:
             try:
                 # Needs to be output dir NOT input dir
-                exec_pre.preprocess(notebook, {'metadata': {'path': args.output_dir}})
+                exec_notebook, _ = exec_pre.preprocess(notebook, {'metadata': {'path': args.output_dir}})
+                notebook = exec_notebook
             except nc.preprocessors.CellExecutionError as e:
                 print('Error: While executing the notebook', infile)
                 print(e)
