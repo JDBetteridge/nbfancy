@@ -1,3 +1,3 @@
-from . import nbfancy_tools
+from . import nbfancy_tools  # noqa: F401
 
 name = 'nbfancy'
