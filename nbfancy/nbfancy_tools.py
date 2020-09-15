@@ -9,6 +9,7 @@ import nbconvert as nc
 
 from urllib.parse import quote as urlquote
 
+
 def isdir(path):
     '''
     Checks whether given path is a directory
@@ -18,6 +19,7 @@ def isdir(path):
     else:
         return path
 
+
 def try_config(configdir, filename):
     '''
     Tries to read specified config, else uses global config
@@ -25,10 +27,10 @@ def try_config(configdir, filename):
     '''
     resource_package = 'nbfancy'
     config_path = '/config'  # Do not use os.path.join()
-    
+
     if not os.path.isdir(configdir):
         configdir = pkg_resources.resource_filename(resource_package, config_path)
-    
+
     try:
         filepath = os.path.join(configdir, filename)
         filehandle = open(filepath, 'r')
@@ -36,8 +38,9 @@ def try_config(configdir, filename):
         configdir = pkg_resources.resource_filename(resource_package, config_path)
         filepath = os.path.join(configdir, filename)
         filehandle = open(filepath, 'r')
-    
+
     return filehandle
+
 
 def read_header(configdir):
     '''
@@ -47,9 +50,10 @@ def read_header(configdir):
     with try_config(configdir, 'header.ipynb') as fh:
         notebook = nf.read(fh, nf.NO_CONVERT)
         template = notebook['cells'][1]
-    
+
     return template
-    
+
+
 def read_footer(configdir):
     '''
     Reads footer from config directory
@@ -58,39 +62,41 @@ def read_footer(configdir):
     with try_config(configdir, 'footer.ipynb') as fh:
         notebook = nf.read(fh, nf.NO_CONVERT)
         template = notebook['cells'][1]
-    
+
     return template
+
 
 def read_box_template(configdir):
     '''
     Reads box template from given file handle
     '''
     filehandle = try_config(configdir, 'box.ipynb')
-    
+
     # File is already open
     # Open file and extract text in second cell
     notebook = nf.read(filehandle, nf.NO_CONVERT)
     box = notebook['cells'][1]
     template = box['source']
-    
+
     # Replace known values with placeholders
     template = template.replace('pale-green', '{bg-colour}')
     template = template.replace('green', '{fg-colour}')
     template = template.replace('fa-star', '{symbol}')
     template = template.replace('TITLE', '{title}')
     template = template.replace('BODY', '{body}')
-    
+
     return template
+
 
 def colour2fgbg(colour):
     '''
     Pairs foreground colour with background colour
     '''
     colour = colour.lower()
-    colour_list = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'] 
+    colour_list = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']
     colour_list += ['brown', 'black', 'grey', 'gray', 'white']
     assert colour in colour_list
-    
+
     fg = colour
     if fg == 'red':
         bg = 'pale-red'
@@ -113,8 +119,9 @@ def colour2fgbg(colour):
         bg = 'light-gray'
     elif fg == 'white':
         bg = 'white'
-    
+
     return fg, bg
+
 
 def read_box_colour_config(configdir):
     '''
@@ -122,7 +129,7 @@ def read_box_colour_config(configdir):
     Lines starting with # are ignored as are blank lines
     '''
     config = dict()
-    
+
     def isTF(val):
         '''
         Return true or false if val is boolean
@@ -135,17 +142,18 @@ def read_box_colour_config(configdir):
         elif test_val in false_words:
             test_val = False
         return test_val
-    
+
     with try_config(configdir, 'keywords.cfg') as fh:
-        no_comments = filter(lambda line: len(line)>3 and line.lstrip()[0]!='#' , fh)
+        no_comments = filter(lambda line: len(line) > 3 and line.lstrip()[0] != '#', fh)
         reader = csv.DictReader(no_comments)
         for row in reader:
             key = row.pop('Keyword')
-            row_dict = {key.strip().lower() : isTF(row[key]) for key in row}
+            row_dict = {key.strip().lower(): isTF(row[key]) for key in row}
             row_dict['fg-colour'], row_dict['bg-colour'] = colour2fgbg(row_dict['colour'])
             config[key.strip().lower()] = row_dict
-    
+
     return config
+
 
 def box_title(line, config):
     '''
@@ -153,37 +161,35 @@ def box_title(line, config):
     Returns html formattted title, index and which keyword was found
     '''
     keywords = config.keys()
-    
+
     # Search for keyword (lowercase) in first line and set that as the key
     for word in keywords:
         if word in line.lower().split(':')[0]:
             key = word
-    
+
     # Recover paramters from keyword
     keep_keyword = config[key]['keep_keyword']
-    hidden = config[key]['hide']
-    
+    # hidden = config[key]['hide']  # For future functionality
+
     # Whether to print keyword in title
     if keep_keyword:
         title = line.lstrip('#')
     else:
         subtitle = line.split(':')
         title = ':'.join(subtitle[1:])
-    
+
     # Safe version of title for links
     safetitle = title.replace(' ', '-')
     safetitle = safetitle.replace('`', '')
     index = urlquote(safetitle, safe='?!$\\') + '%0A'
-    
+
     # Mark up title, incase markdown syntax is used
     htmltitle = nc.filters.markdown2html(title)
     htmltitle = htmltitle.replace('<p>', '')
     htmltitle = htmltitle.replace('</p>', '')
-    
-    #link = './' + solnfilename.split('/')[-1] + '#' + index
-    
+
     return htmltitle, index, key
-    
+
 
 def recursion_detector(f):
     '''
@@ -196,6 +202,7 @@ def recursion_detector(f):
         return f(*args, **kwargs)
     return decorated_f
 
+
 @recursion_detector
 def box_body(body, config, template, solnfilename, link=None, multicell=None):
     '''
@@ -205,54 +212,53 @@ def box_body(body, config, template, solnfilename, link=None, multicell=None):
     # that was generated by the title (for single cell)
     if len(body) > 0 and '[solution]()' in body[-1].lower():
         k = body[-1].lower().find('[solution]()')
-        solution_phrase = body[-1][k:k+13]
-        new_solution_phrase = '\n\n' + solution_phrase.replace('()','({link})')
+        solution_phrase = body[-1][k:k + 13]
+        new_solution_phrase = '\n\n' + solution_phrase.replace('()', '({link})')
         new_solution_phrase = new_solution_phrase.format(link=link)
         body[-1] = body[-1].replace(solution_phrase, new_solution_phrase)
-        
+
     body = '\n'.join(body)
-    
+
     # Apply markup
     htmlbody = nc.filters.markdown2html(body)
-    
+
     if multicell is not None:
         # Bit of recursion
-        #print('Warning nested cell environments')
         rendered, soln = notebook2rendered(multicell, config, template, solnfilename)
-        
+
         # Export to html to include in cell
         html_exp = nc.HTMLExporter()
-        html_exp.template_file = 'basic'
+        html_exp.template_name = 'classic'
         temphtml, resources = html_exp.from_notebook_node(rendered)
         # Remove multiple newlines
         temphtml = re.sub(r'(\n\s*)+\n', '\n', temphtml)
         # Add boxy thing
         temphtml = temphtml.replace('class="input_area"',
-                        'class="output_area" style="background-color:#F7F7F7;border:1px solid #CFCFCF"')
+            'class="output_area" style="background-color:#F7F7F7;border:1px solid #CFCFCF"')  # noqa: E128
         # If an empty link to a solution is found, populate it with link
         # that was generated by the title (for multicell)
         if '<a href="">solution</a>' in temphtml.lower():
             k = temphtml.lower().find('<a href="">solution</a>')
-            solution_phrase = temphtml[k:k+24]
-            new_solution_phrase = solution_phrase.replace('href=""','href="{link}"')
+            solution_phrase = temphtml[k:k + 24]
+            new_solution_phrase = solution_phrase.replace('href=""', 'href="{link}"')
             new_solution_phrase = new_solution_phrase.format(link=link)
             temphtml = temphtml.replace(solution_phrase, new_solution_phrase)
-        
+
         htmlbody += temphtml
-    
+
     # Escape symbols
     htmlbody = htmlbody.replace('*', '&ast;')
-    #htmlbody = htmlbody.replace('_', '&lowbar;')
-    
+
     # Format tables
     htmlbody = htmlbody.replace('<table>', '<table class="w3-table w3-striped w3-hoverable">')
     htmlbody = htmlbody.replace('<thead>', '<thead class="w3-black">')
-    
+
     # Be sure to remove final newline
     if len(htmlbody) > 0 and htmlbody[-1] == '\n':
         htmlbody = htmlbody[:-1]
-    
+
     return htmlbody
+
 
 def notebook2rendered(plain, config, template, solnfilename):
     '''
@@ -260,27 +266,27 @@ def notebook2rendered(plain, config, template, solnfilename):
     '''
     # List all the markdown cells
     celllist = plain['cells']
-    markdownlist = [c for c in celllist if c['cell_type']=='markdown']
+    markdownlist = [c for c in celllist if c['cell_type'] == 'markdown']
     solnb = None
-    
+
     # For each markdown cell check for keywords and format according to
     # the cell template and config files
     end = -1
-    
+
     for c in markdownlist:
         line = c['source'].split('\n')
-        
+
         # Check for a colon in the first line
         if line[0].find(':') < 0:
             continue
-        
+
         # Check for a keyword if a colon is found
         temp_line = line[0].split(':')
         if any(keyword in temp_line[0].lower().strip('# ') for keyword in config.keys()):
             htmltitle, index, key = box_title(line[0], config)
             # Recover paramters from keyword
             hidden = config[key]['hide']
-            
+
             # Multicell procedure
             if key + '+' in temp_line[0].lower().strip('# '):
                 start = celllist.index(c) + 1
@@ -304,12 +310,12 @@ def notebook2rendered(plain, config, template, solnfilename):
                         print('Warning in temporary file:')
                         print('\tNo end tag found for', key + '+', 'environment in cell', start)
                         print('\tCheck you haven\'t nested environments')
-                
+
                 # Move multicells to new notebook for processing
                 multicell = celllist[start:end]
                 for subcell in multicell:
                     celllist.remove(subcell)
-                    
+
                 multicellnb = nf.v4.new_notebook()
                 multicellnb['metadata'] = plain['metadata']
                 multicellnb['cells'] = multicell
@@ -317,7 +323,7 @@ def notebook2rendered(plain, config, template, solnfilename):
                 # If we aren't in a multicell environment
                 # we don't need the additional notebook
                 multicellnb = None
-            
+
             # If hidden move cell to new notebook
             if hidden:
                 # Make a new notebook if it doesn't exist already
@@ -325,7 +331,7 @@ def notebook2rendered(plain, config, template, solnfilename):
                     solnb = nf.v4.new_notebook()
                     solnb['metadata'] = plain['metadata']
                     solnb['cells'].append(nf.v4.new_markdown_cell(source='# Solutions'))
-                
+
                 solnb['cells'].append(nf.v4.new_markdown_cell(source=''))
                 # REDEFINE c
                 solnb['cells'][-1] = c.copy()
@@ -335,14 +341,15 @@ def notebook2rendered(plain, config, template, solnfilename):
             else:
                 link = './' + solnfilename.split('/')[-1] + '#' + index
                 htmlbody = box_body(line[1:], config, template, solnfilename, link=link, multicell=multicellnb)
-            
+
             values = config[key].copy()
             values['index'] = index
             values['title'] = htmltitle
             values['body'] = htmlbody
             c['source'] = template.format_map(values)
-    
+
     return plain, solnb
+
 
 def notebook2HTML(filename):
     '''
@@ -350,64 +357,66 @@ def notebook2HTML(filename):
     '''
     html_exp = nc.HTMLExporter()
     html, resources = html_exp.from_filename(filename)
-    
+
     # SED rules:
     # Replace '../folders' in links with './folders'
     # for folders images, data, code
     html = html.replace('../images', './images')
     html = html.replace('../data', './data')
     html = html.replace('../code', './code')
-    
+
     # Replace '.ipynb' in links with '.html'
     # the '"' ensures this (hopefully) only happens in links
     html = html.replace('.ipynb"', '.html"')
     html = html.replace('.ipynb#', '.html#')
-    
+
     # Horrible hack because <code> environment doesn't seem to work with CSS sheet
     # For plaintext blocks
     html = html.replace('<pre><code>', '<pre><code style="">')
     # For inline highlighting
     html = html.replace('<code>', '<code style="background-color:#F7F7F7;border:1px solid #CFCFCF">')
-    
-	# Another hack since \n is converted to [space] in links
-    html = html.replace('%0A"','%20"')
-    
+
+# Another hack since \n is converted to [space] in links
+    html = html.replace('%0A"', '%20"')
+
     # Add the favicon
     html = html.replace('<head><meta charset="utf-8" />',
-        '<head><meta charset="utf-8" />\n<link rel="icon" type="image/png" href="css/favicon.png"/>')
-    
+        '<head><meta charset="utf-8" />\n<link rel="icon" type="image/png" href="css/favicon.png"/>')  # noqa: E128
+
     return html
+
 
 def notebook2slides(filename):
     '''
     Converts notebook file to a slide show
     '''
     slides_exp = nc.SlidesExporter()
-    slides_exp.reveal_scroll = True # Doesn't work?
+    slides_exp.reveal_scroll = True  # Doesn't work?
     slides, resources = slides_exp.from_filename(filename)
-    
+
     # Custom CSS is in the directory above slides
     slides = slides.replace('href="custom.css"', 'href="../custom.css"')
-    
+
     # Replace '.ipynb' in links with '.html'
     # the '"' ensures this (hopefully) only happens in links
     slides = slides.replace('.ipynb"', '.html"')
     slides = slides.replace('.ipynb#', '.html#')
-    
+
     # Horrible hack because <code> environment doesn't seem to work with CSS sheet
     # For plaintext blocks
     slides = slides.replace('<pre><code>', '<pre><code style="">')
     # For inline highlighting
     slides = slides.replace('<code>', '<code style="background-color:#F7F7F7;border:1px solid #CFCFCF">')
-    
-	# Another hack since \n is converted to [space] in links
-    slides = slides.replace('%0A"','%20"')
-    
+
+    # Another hack since \n is converted to [space] in links
+    slides = slides.replace('%0A"', '%20"')
+
     # Add the favicon
     slides = slides.replace('<head><meta charset="utf-8" />',
-        '<head><meta charset="utf-8" />\n<link rel="icon" type="image/png" href="css/favicon.png"/>')
-    
+        '<head><meta charset="utf-8" />\n<link rel="icon" type="image/png" href="css/favicon.png"/>')  # noqa: E128
+
     return slides
+
 
 def directory_contents(directory):
     '''
@@ -422,15 +431,16 @@ def directory_contents(directory):
         contents.remove('.ipynb_checkpoints')
     except ValueError:
         pass
-    
+
     # Removes everything that isn't a notebook ending with .ipynb
     contents = [f for f in contents if '.ipynb' in f]
-    
+
     # Remove solution files from contents and store in seperate list
     soln_contents = [f for f in contents if '-soln' in f]
     contents = [f for f in contents if '-soln' not in f]
-    
+
     return contents, soln_contents
+
 
 def navigation_triple(directory, inputfile):
     '''
@@ -441,19 +451,18 @@ def navigation_triple(directory, inputfile):
     and returns these files as a dict
     '''
     contents, _ = directory_contents(directory)
-    
+
     contents.append(contents[0])
-    
+
     current = inputfile.split('/')[-1]
     # Exceptional case if you're making a new solution document
     if '-soln' in current:
-        current = current.replace('-soln','')
-    
-    index = contents.index(current)
-    
-    outdir = './'
-    triple = {  'previous' : outdir+contents[index-1],
-                'index'    : outdir+contents[0],
-                'next'     : outdir+contents[index+1] }
-    return triple
+        current = current.replace('-soln', '')
 
+    index = contents.index(current)
+
+    outdir = './'
+    triple = {'previous': outdir + contents[index - 1],
+              'index': outdir + contents[0],
+              'next': outdir + contents[index + 1]}
+    return triple

@@ -9,12 +9,12 @@ setuptools.setup(
     version='0.1a3',
     author='Jack Betteridge',
     packages=setuptools.find_packages(),
-    package_data = {
-        'nbfancy/config'    : ['*.ipynb', '*.cfg'],
-        'nbfancy/tools'     : ['*'],
+    package_data={
+        'nbfancy/config': ['*.ipynb', '*.cfg'],
+        'nbfancy/tools':  ['*'],
     },
     include_package_data=True,
-    install_requires = ['ipython>=6', 'notebook==5.7.10',],
+    install_requires=['ipython>=6', 'jupyter'],
     entry_points={
         'console_scripts': [
             'nbfancy=nbfancy.__main__:main',
