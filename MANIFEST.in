@@ -1,6 +1,5 @@
 # REQUIRED CSS FILES
-include nbfancy/tools/custom.css
-graft nbfancy/tools/css
+recursive-include nbfancy/tools *
 
 # REQUIRED TEMPLATE FILES
 recursive-include nbfancy/config *.ipynb *.cfg
