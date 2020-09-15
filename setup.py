@@ -14,7 +14,7 @@ setuptools.setup(
         'nbfancy/tools'     : ['*'],
     },
     include_package_data=True,
-    install_requires = ['ipython>=6', 'jupyter',],
+    install_requires = ['ipython>=6', 'notebook==5.7.10',],
     entry_points={
         'console_scripts': [
             'nbfancy=nbfancy.__main__:main',
